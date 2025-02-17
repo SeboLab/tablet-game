@@ -6,36 +6,67 @@ import android.widget.GridLayout;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
 import android.content.Intent;
 
 public class GamePage extends AppCompatActivity {
-    private static final int ROWS = 4;
-    private static final int COLUMNS = 4;
+    private static int ROWS;
+    private static int COLUMNS;
 
-    private Button[][] leftButtons = new Button[ROWS][COLUMNS];
-    private char[][] leftNumbers = new char[ROWS][COLUMNS];
-    private boolean[][] leftRevealed = new boolean[ROWS][COLUMNS];
+    private Button[][] leftButtons;
+    private char[][] leftNumbers;
+    private boolean[][] leftRevealed;
 
-    private Button[][] rightButtons = new Button[ROWS][COLUMNS];
-    private char[][] rightNumbers = new char[ROWS][COLUMNS];
-    private boolean[][] rightRevealed = new boolean[ROWS][COLUMNS];
+    private Button[][] rightButtons;
+    private char[][] rightNumbers;
+    private boolean[][] rightRevealed;
 
-    private Board leftGame = new Board(ROWS, COLUMNS);
-    private Board rightGame = new Board(ROWS, COLUMNS);
+    private Board leftGame;
+    private Board rightGame;
+    private boolean interrupt = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.game_board);
-        // Find the TextView by ID
-        TextView textViewMode = findViewById(R.id.textViewMode);
 
-        // Set new text dynamically
-        textViewMode.setText(getIntent().getStringExtra("difficulty"));
+        TextView textViewMode = findViewById(R.id.textViewMode);
+        String difficulty = getIntent().getStringExtra("difficulty");
+        if (difficulty == null) difficulty = "Easy"; // Default value if null
+        textViewMode.setText(difficulty);
+
+        // Set grid size
+        switch (difficulty) {
+            case "Medium":
+                ROWS = 5;
+                COLUMNS = 5;
+                break;
+            case "Hard":
+                ROWS = 7;
+                COLUMNS = 7;
+                break;
+            default:
+                ROWS = 3;
+                COLUMNS = 3;
+                break;
+        }
+
+        leftButtons = new Button[ROWS][COLUMNS];
+        leftNumbers = new char[ROWS][COLUMNS];
+        leftRevealed = new boolean[ROWS][COLUMNS];
+
+        rightButtons = new Button[ROWS][COLUMNS];
+        rightNumbers = new char[ROWS][COLUMNS];
+        rightRevealed = new boolean[ROWS][COLUMNS];
+
+        leftGame = new Board(ROWS, COLUMNS);
+        rightGame = new Board(ROWS, COLUMNS);
 
         GridLayout leftGridLayout = findViewById(R.id.leftBoard);
         GridLayout rightGridLayout = findViewById(R.id.rightBoard);
@@ -56,14 +87,66 @@ public class GamePage extends AppCompatActivity {
         initializeBoard(leftGridLayout, leftButtons, leftNumbers, leftRevealed, true);
         initializeBoard(rightGridLayout, rightButtons, rightNumbers, rightRevealed, false);
 
-        // Back to Home Button
         Button backHomeButton = findViewById(R.id.backHomeButton);
         backHomeButton.setOnClickListener(v -> {
             Intent intent = new Intent(GamePage.this, HomeActivity.class);
             startActivity(intent);
             finish();
         });
+
+        startGameTimer();
     }
+
+    private void startGameTimer() {
+        GameTimer.getInstance().startTimer(() -> {
+            runOnUiThread(() -> {
+                System.out.println("Misty's turn triggered by timer.");
+                Toast.makeText(GamePage.this, "Hit Timmer.", Toast.LENGTH_SHORT).show();
+                interrupt = true; // Set flag for Misty's turn
+            });
+        });
+    }
+
+    private void performTimedAction() {
+        runOnUiThread(() -> Toast.makeText(GamePage.this, "Misty doing some stuff", Toast.LENGTH_SHORT).show());
+    }
+
+    public void mistyTurn() {
+        if (interrupt) {
+            System.out.println("Misty's turn started.");
+            performTimedAction();
+            interrupt = false; // Reset interrupt flag
+            GameTimer.getInstance().resetTimer(); // Reset the timer
+            startGameTimer(); // Restart the game timer
+        }
+
+        flipRandomSquare(); // Continue Misty's turn
+    }
+
+    private void flipRandomSquare() {
+        System.out.println("Misty is playing...");
+
+        Random random = new Random();
+        int randRow, randCol;
+
+        do {
+            Solver solver = new Solver(ROWS, COLUMNS, rightNumbers, rightRevealed);
+            int[] move = solver.getMove(getIntent().getStringExtra("difficulty"));
+
+            randRow = move[0];
+            randCol = move[1];
+        } while (rightRevealed[randRow][randCol]);
+
+        flipButton(randRow, randCol, false); // Misty plays on right board
+
+        int finalRandRow = randRow;
+        int finalRandCol = randCol;
+        new Thread(() -> {
+            MistyConnection misty = new MistyConnection("192.168.1.143", 80);
+            misty.speak("Misty has chosen Row " + finalRandRow + " and Column " + finalRandCol, false, "2");
+        }).start();
+    }
+
 
     private void generateShuffledNumbers(Board board, char[][] numbers, boolean[][] revealed) {
         List<Character> values = new ArrayList<>();
@@ -86,7 +169,7 @@ public class GamePage extends AppCompatActivity {
             for (int col = 0; col < COLUMNS; col++) {
                 final int r = row, c = col;
                 buttons[row][col] = new Button(this);
-                buttons[row][col].setText(""); // Initially blank
+                buttons[row][col].setText("");
                 buttons[row][col].setTextSize(24);
 
                 GridLayout.LayoutParams params = new GridLayout.LayoutParams();
@@ -97,10 +180,8 @@ public class GamePage extends AppCompatActivity {
                 buttons[row][col].setLayoutParams(params);
 
                 if (isLeftBoard) {
-                    // Allow human to play on left board
                     buttons[row][col].setOnClickListener(v -> buttonClick(r, c));
                 } else {
-                    // Disable interaction on Misty’s board
                     buttons[row][col].setEnabled(false);
                 }
 
@@ -110,7 +191,7 @@ public class GamePage extends AppCompatActivity {
     }
 
     private void buttonClick(int row, int column) {
-        char v = flipButton(row, column, true, true); // Human plays on left board
+        char v = flipButton(row, column, true);
 
         new Thread(() -> {
             MistyConnection misty = new MistyConnection("192.168.1.143", 80);
@@ -126,26 +207,20 @@ public class GamePage extends AppCompatActivity {
         }).start();
 
         if (v != 'G' && v != 'B') {
-            new Handler().postDelayed(this::flipRandomSquare, 1500);
+            new Handler().postDelayed(this::mistyTurn, 1500);
         }
     }
 
-
-    private char flipButton(int row, int col, boolean player, boolean isLeftBoard) {
+    private char flipButton(int row, int col, boolean isLeftBoard) {
         Button[][] buttons = isLeftBoard ? leftButtons : rightButtons;
         char[][] numbers = isLeftBoard ? leftNumbers : rightNumbers;
         boolean[][] revealed = isLeftBoard ? leftRevealed : rightRevealed;
 
         if (!revealed[row][col]) {
-            buttons[row][col].setText(String.valueOf(numbers[row][col])); // Show number
+            buttons[row][col].setText(String.valueOf(numbers[row][col]));
             revealed[row][col] = true;
 
-            if (numbers[row][col] == 'G') {
-                Toast.makeText(this, (player ? "You" : "Misty") + " hit gold!", Toast.LENGTH_SHORT).show();
-                Toast.makeText(this, (player ? "You" : "Misty") + " won the game! Resetting now...", Toast.LENGTH_LONG).show();
-                new Handler().postDelayed(this::resetGame, 3000);
-            } else if (numbers[row][col] == 'B') {
-                Toast.makeText(this, (player ? "You" : "Misty") + " hit a Bomb!", Toast.LENGTH_SHORT).show();
+            if (numbers[row][col] == 'G' || numbers[row][col] == 'B') {
                 new Handler().postDelayed(this::resetGame, 3000);
             }
             return numbers[row][col];
@@ -153,29 +228,9 @@ public class GamePage extends AppCompatActivity {
         return 'a';
     }
 
-    private void flipRandomSquare() {
-        System.out.println("Misty is playing...");
-
-        Random random = new Random();
-        int randRow, randCol;
-
-        do {
-            randRow = random.nextInt(ROWS);
-            randCol = random.nextInt(COLUMNS);
-        } while (rightRevealed[randRow][randCol]); // Ensure Misty doesn't flip an already revealed tile
-
-        flipButton(randRow, randCol, false, false); // Misty plays on right board
-
-        int finalRandRow = randRow;
-        int finalRandCol = randCol;
-        new Thread(() -> {
-            MistyConnection misty = new MistyConnection("192.168.1.143", 80);
-            misty.speak("Misty has chosen Row " + finalRandRow + " and Column " + finalRandCol, false, "2");
-        }).start();
-    }
-
     private void resetGame() {
         Intent intent = new Intent(GamePage.this, GamePage.class);
+        intent.putExtra("difficulty", getIntent().getStringExtra("difficulty"));
         startActivity(intent);
         finish();
     }

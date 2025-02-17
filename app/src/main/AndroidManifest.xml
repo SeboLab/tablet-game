@@ -27,8 +27,6 @@
         </activity>
 
         <activity android:name=".GamePage" android:exported="true"/>
-        <activity android:name=".MediumActivity" android:exported="true"/>
-        <activity android:name=".EasyActivity" android:exported="true"/>
         <activity android:name=".PracticeActivity"/>
         <activity android:name=".AvatarSelectionActivity" />
 

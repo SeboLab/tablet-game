@@ -27,19 +27,7 @@ public class AvatarSelectionActivity extends AppCompatActivity {
     }
 
     private void startGame(String avatarColor) {
-        Intent intent;
-        if(selectedDifficulty.equals("Hard"))
-        {
-            intent = new Intent(AvatarSelectionActivity.this, GamePage.class);
-
-        }
-        else if(selectedDifficulty.equals("Medium"))
-        {
-            intent = new Intent(AvatarSelectionActivity.this, MediumActivity.class);
-        }
-        else {
-            intent = new Intent(AvatarSelectionActivity.this, EasyActivity.class);
-        }
+        Intent intent = new Intent(AvatarSelectionActivity.this, GamePage.class);
         intent.putExtra("difficulty", selectedDifficulty);
         intent.putExtra("avatar", avatarColor);
         startActivity(intent);
