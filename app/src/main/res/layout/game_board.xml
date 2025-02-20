@@ -48,6 +48,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="16dp"/>
+
+            <TextView
+                android:id="@+id/leftGoldCountText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Child Gold: 0"
+                android:textSize="18sp"
+                android:layout_margin="16dp"/>
         </LinearLayout>
 
         <!-- Right Board (Misty) -->
@@ -61,7 +69,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Misty's Board"
+                android:text="Robot Misty's Board"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:layout_gravity="center_horizontal"
@@ -72,6 +80,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="16dp"/>
+
+            <TextView
+                android:id="@+id/rightGoldCountText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Robot's Gold: 0"
+                android:textSize="18sp"
+                android:layout_margin="16dp"/>
         </LinearLayout>
 
     </LinearLayout>
@@ -86,5 +102,12 @@
         android:backgroundTint="@color/purple_700"
         android:textColor="@android:color/white"
         android:textStyle="bold"/>
+
+    <ImageButton
+        android:id="@+id/gameButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleType="centerCrop"
+        android:adjustViewBounds="true"/>
 
 </LinearLayout>

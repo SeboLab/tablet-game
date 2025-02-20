@@ -4,8 +4,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.widget.GridLayout;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ImageButton;
+import android.graphics.Color;
+
+
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -31,6 +36,13 @@ public class GamePage extends AppCompatActivity {
     private Board rightGame;
     private boolean interrupt = false;
 
+    private int leftGoldCount = 0;
+    private int rightGoldCount = 0;
+
+    private TextView leftGoldCountText;
+    private TextView rightGoldCountText;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,6 +52,8 @@ public class GamePage extends AppCompatActivity {
         String difficulty = getIntent().getStringExtra("difficulty");
         if (difficulty == null) difficulty = "Easy"; // Default value if null
         textViewMode.setText(difficulty);
+        leftGoldCountText = findViewById(R.id.leftGoldCountText);
+        rightGoldCountText = findViewById(R.id.rightGoldCountText);
 
         // Set grid size
         switch (difficulty) {
@@ -101,7 +115,7 @@ public class GamePage extends AppCompatActivity {
         GameTimer.getInstance().startTimer(() -> {
             runOnUiThread(() -> {
                 System.out.println("Misty's turn triggered by timer.");
-                Toast.makeText(GamePage.this, "Hit Timmer.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(GamePage.this, "Hit Timer.", Toast.LENGTH_SHORT).show();
                 interrupt = true; // Set flag for Misty's turn
             });
         });
@@ -169,6 +183,8 @@ public class GamePage extends AppCompatActivity {
             for (int col = 0; col < COLUMNS; col++) {
                 final int r = row, c = col;
                 buttons[row][col] = new Button(this);
+                //buttons[row][col].setScaleType(ImageView.ScaleType.CENTER_CROP);
+                //buttons[row][col].setAdjustViewBounds(true);
                 buttons[row][col].setText("");
                 buttons[row][col].setTextSize(24);
 
@@ -177,7 +193,10 @@ public class GamePage extends AppCompatActivity {
                 params.columnSpec = GridLayout.spec(col);
                 params.width = 150;
                 params.height = 150;
+                params.setMargins(2, 2, 2, 2);
                 buttons[row][col].setLayoutParams(params);
+
+                buttons[row][col].setBackgroundResource(R.drawable.dirt);
 
                 if (isLeftBoard) {
                     buttons[row][col].setOnClickListener(v -> buttonClick(r, c));
@@ -217,21 +236,73 @@ public class GamePage extends AppCompatActivity {
         boolean[][] revealed = isLeftBoard ? leftRevealed : rightRevealed;
 
         if (!revealed[row][col]) {
-            buttons[row][col].setText(String.valueOf(numbers[row][col]));
+            //buttons[row][col].setText(String.valueOf(numbers[row][col]));
             revealed[row][col] = true;
 
-            if (numbers[row][col] == 'G' || numbers[row][col] == 'B') {
-                new Handler().postDelayed(this::resetGame, 3000);
+
+            if (numbers[row][col] == 'G') {
+                if (isLeftBoard) {
+                    leftGoldCount++;
+                    leftGoldCountText.setText("Child Gold: " + leftGoldCount);
+                }
+                else {
+                    rightGoldCount++;
+                    rightGoldCountText.setText("Robot Gold: " + rightGoldCount);
+                }
+                buttons[row][col].setBackgroundResource(R.drawable.gold); // this will show gold image
+                new Handler().postDelayed(() -> resetBoard(isLeftBoard), 3000);
+            } else if (numbers[row][col] == 'B') {
+                buttons[row][col].setBackgroundResource(R.drawable.bomb); // this will show bomb image
+                new Handler().postDelayed(() -> resetBoard(isLeftBoard), 3000);
+            } else {
+                buttons[row][col].setText(String.valueOf(numbers[row][col])); // this will show the number of squares away from the bomb
+                buttons[row][col].setTextColor(Color.BLACK);
+                buttons[row][col].setBackgroundColor(Color.LTGRAY);
             }
             return numbers[row][col];
         }
         return 'a';
     }
 
-    private void resetGame() {
-        Intent intent = new Intent(GamePage.this, GamePage.class);
-        intent.putExtra("difficulty", getIntent().getStringExtra("difficulty"));
-        startActivity(intent);
-        finish();
+    //private void resetGame() {
+        //Intent intent = new Intent(GamePage.this, GamePage.class);
+        //intent.putExtra("difficulty", getIntent().getStringExtra("difficulty"));
+        //startActivity(intent);
+       // finish();
+    //}
+
+    //utilized the boolean flag isLeftBoard that was in the flipButton
+    //if it's the left board then go into that condition
+    //if not then it'd be the right baord that'd get updated
+    //above was the reset game but it resets the whole game
+    //so i changed it to reset board so it changes the individual board
+    private void resetBoard(boolean isLeftBoard) {
+        if (isLeftBoard) {
+            leftGame = new Board(ROWS, COLUMNS);
+            generateShuffledNumbers(leftGame, leftNumbers, leftRevealed);
+
+            for (int row = 0; row < ROWS; row++) {
+                for (int col = 0; col < COLUMNS; col++) {
+                    leftButtons[row][col].setText("");
+                    leftButtons[row][col].setBackgroundResource(R.drawable.dirt);
+                    leftRevealed[row][col] = false;
+                }
+            }
+
+
+        }
+        else {
+            rightGame = new Board(ROWS, COLUMNS);
+            generateShuffledNumbers(rightGame, rightNumbers, rightRevealed);
+
+            for (int row = 0; row < ROWS; row++) {
+                for (int col = 0; col < COLUMNS; col++) {
+                    rightButtons[row][col].setText("");
+                    rightButtons[row][col].setBackgroundResource(R.drawable.dirt);
+                    rightRevealed[row][col] = false;
+                }
+            }
+        }
+
     }
 }

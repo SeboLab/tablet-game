@@ -17,6 +17,13 @@
         android:textStyle="bold"
         android:layout_marginBottom="24dp"/>
 
+
+    <ImageView
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/fire"
+        android:layout_marginEnd="8dp" />
+
     <Button
         android:id="@+id/redAvatarButton"
         android:layout_width="wrap_content"
@@ -27,6 +34,13 @@
         android:textColor="@android:color/white"
         android:layout_marginBottom="16dp"/>
 
+
+    <ImageView
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/water"
+        android:layout_marginEnd="8dp" />
+
     <Button
         android:id="@+id/blueAvatarButton"
         android:layout_width="wrap_content"
@@ -34,5 +48,5 @@
         android:text="Select Blue Avatar"
         android:padding="12dp"
         android:backgroundTint="@android:color/holo_blue_light"
-        android:textColor="@android:color/white"/>
+        android:textColor="@android:color/white" />
 </LinearLayout>

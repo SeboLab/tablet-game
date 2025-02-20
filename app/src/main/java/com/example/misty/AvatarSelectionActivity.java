@@ -8,6 +8,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class AvatarSelectionActivity extends AppCompatActivity {
     private String selectedDifficulty;
+    private boolean isRedAvatarSelected;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,13 +23,17 @@ public class AvatarSelectionActivity extends AppCompatActivity {
         avatarText.setText("Choose Your Avatar for " + selectedDifficulty);
 
         Button redAvatarButton = findViewById(R.id.redAvatarButton);
+
+
         Button blueAvatarButton = findViewById(R.id.blueAvatarButton);
+
 
         redAvatarButton.setOnClickListener(v -> startGame("Red"));
         blueAvatarButton.setOnClickListener(v -> startGame("Blue"));
     }
 
     private void startGame(String avatarColor) {
+        isRedAvatarSelected = avatarColor.equals("Red");
         Intent intent = new Intent(AvatarSelectionActivity.this, GamePage.class);
         intent.putExtra("difficulty", selectedDifficulty);
         intent.putExtra("avatar", avatarColor);
