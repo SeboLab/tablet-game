@@ -34,13 +34,12 @@
             android:gravity="center"
             android:layout_marginEnd="32dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Human's Board"
-                android:textSize="18sp"
-                android:textStyle="bold"
+            <ImageView
+                android:id="@+id/leftAvatarImage"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
                 android:layout_gravity="center_horizontal"
+                android:src="@drawable/fire"
                 android:layout_marginBottom="8dp"/>
 
             <GridLayout
@@ -49,13 +48,22 @@
                 android:layout_height="wrap_content"
                 android:padding="16dp"/>
 
+            <ImageView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center_horizontal"
+                android:src="@drawable/box"
+                android:layout_marginBottom="8dp"/>
+
             <TextView
                 android:id="@+id/leftGoldCountText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Child Gold: 0"
-                android:textSize="18sp"
-                android:layout_margin="16dp"/>
+                android:text="0"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black"
+                android:layout_gravity="center"/>
         </LinearLayout>
 
         <!-- Right Board (Misty) -->
@@ -66,13 +74,12 @@
             android:gravity="center"
             android:layout_marginStart="32dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Robot Misty's Board"
-                android:textSize="18sp"
-                android:textStyle="bold"
+            <ImageView
+                android:id="@+id/rightAvatarImage"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
                 android:layout_gravity="center_horizontal"
+                android:src="@drawable/water"
                 android:layout_marginBottom="8dp"/>
 
             <GridLayout
@@ -81,13 +88,22 @@
                 android:layout_height="wrap_content"
                 android:padding="16dp"/>
 
+            <ImageView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center_horizontal"
+                android:src="@drawable/box"
+                android:layout_marginBottom="8dp"/>
+
             <TextView
                 android:id="@+id/rightGoldCountText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Robot's Gold: 0"
-                android:textSize="18sp"
-                android:layout_margin="16dp"/>
+                android:text="0"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black"
+                android:layout_gravity="center"/>
         </LinearLayout>
 
     </LinearLayout>

@@ -55,6 +55,21 @@ public class GamePage extends AppCompatActivity {
         leftGoldCountText = findViewById(R.id.leftGoldCountText);
         rightGoldCountText = findViewById(R.id.rightGoldCountText);
 
+        String avatar = getIntent().getStringExtra("avatar");
+        if (avatar == null) avatar = "Red";
+
+        ImageView leftAvatarImage = findViewById(R.id.leftAvatarImage);
+        ImageView rightAvatarImage = findViewById(R.id.rightAvatarImage);
+
+        if ("Red".equals(avatar)) {
+            leftAvatarImage.setImageResource(R.drawable.fire);
+            rightAvatarImage.setImageResource(R.drawable.water);
+
+        } else {
+            leftAvatarImage.setImageResource(R.drawable.water);
+            rightAvatarImage.setImageResource(R.drawable.fire);
+        }
+
         // Set grid size
         switch (difficulty) {
             case "Medium":
@@ -243,11 +258,17 @@ public class GamePage extends AppCompatActivity {
             if (numbers[row][col] == 'G') {
                 if (isLeftBoard) {
                     leftGoldCount++;
-                    leftGoldCountText.setText("Child Gold: " + leftGoldCount);
+                    if (leftGoldCountText != null) {
+                        leftGoldCountText.setText(" " + leftGoldCount);
+                    }
+
                 }
                 else {
                     rightGoldCount++;
-                    rightGoldCountText.setText("Robot Gold: " + rightGoldCount);
+                    if (rightGoldCountText != null) {
+                        rightGoldCountText.setText(" " + rightGoldCount);
+                    }
+
                 }
                 buttons[row][col].setBackgroundResource(R.drawable.gold); // this will show gold image
                 new Handler().postDelayed(() -> resetBoard(isLeftBoard), 3000);
