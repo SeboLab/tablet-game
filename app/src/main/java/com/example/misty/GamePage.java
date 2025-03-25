@@ -9,6 +9,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ImageButton;
 import android.graphics.Color;
+import android.widget.LinearLayout;
+import android.view.Gravity;
+import android.view.ViewGroup;
+import android.util.DisplayMetrics;
+
+
+
 
 
 
@@ -42,6 +49,11 @@ public class GamePage extends AppCompatActivity {
     private TextView leftGoldCountText;
     private TextView rightGoldCountText;
 
+    //variables for the left and right row and column numbers
+    private LinearLayout leftRowNumbers, leftColumnNumbers;
+    private LinearLayout rightRowNumbers, rightColumnNumbers;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +82,13 @@ public class GamePage extends AppCompatActivity {
             rightAvatarImage.setImageResource(R.drawable.fire);
         }
 
+        //calling from the xml file with the linear layout
+        leftRowNumbers = findViewById(R.id.leftRowNumbers);
+        leftColumnNumbers = findViewById(R.id.leftColumnNumbers);
+        rightRowNumbers = findViewById(R.id.rightRowNumbers);
+        rightColumnNumbers = findViewById(R.id.rightColumnNumbers);
+
+
         // Set grid size
         switch (difficulty) {
             case "Medium":
@@ -85,6 +104,8 @@ public class GamePage extends AppCompatActivity {
                 COLUMNS = 3;
                 break;
         }
+        //the method in which we can set the row and column numbers
+        setupGrid();
 
         leftButtons = new Button[ROWS][COLUMNS];
         leftNumbers = new char[ROWS][COLUMNS];
@@ -194,6 +215,16 @@ public class GamePage extends AppCompatActivity {
     }
 
     private void initializeBoard(GridLayout gridLayout, Button[][] buttons, char[][] numbers, boolean[][] revealed, boolean isLeftBoard) {
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        int screenWidth = displayMetrics.widthPixels;
+        int screenHeight = displayMetrics.heightPixels;
+
+        int maxBoardWidth = (int) (screenWidth * 0.9); // 90% of screen width
+        int maxBoardHeight = (int) (screenHeight * 0.6); // 60% of screen height
+
+// Adjust button size based on rows/columns, ensuring it fits within limits
+        int buttonSize = Math.min(maxBoardWidth / (COLUMNS + 1), maxBoardHeight / (ROWS + 2));
+
         for (int row = 0; row < ROWS; row++) {
             for (int col = 0; col < COLUMNS; col++) {
                 final int r = row, c = col;
@@ -201,14 +232,14 @@ public class GamePage extends AppCompatActivity {
                 //buttons[row][col].setScaleType(ImageView.ScaleType.CENTER_CROP);
                 //buttons[row][col].setAdjustViewBounds(true);
                 buttons[row][col].setText("");
-                buttons[row][col].setTextSize(24);
+                buttons[row][col].setTextSize(15);
 
                 GridLayout.LayoutParams params = new GridLayout.LayoutParams();
                 params.rowSpec = GridLayout.spec(row);
                 params.columnSpec = GridLayout.spec(col);
-                params.width = 150;
-                params.height = 150;
-                params.setMargins(2, 2, 2, 2);
+                params.width = buttonSize;
+                params.height = buttonSize;
+                params.setMargins(1, 1, 1, 1);
                 buttons[row][col].setLayoutParams(params);
 
                 buttons[row][col].setBackgroundResource(R.drawable.dirt);
@@ -224,6 +255,9 @@ public class GamePage extends AppCompatActivity {
         }
     }
 
+    //sends signals to the misty regarding row + column picked
+    //the format needs to be in (row, column) or (column, row) where both has to be valid
+    //row is displayed in letters and column are numbers
     private void buttonClick(int row, int column) {
         char v = flipButton(row, column, true);
 
@@ -244,6 +278,69 @@ public class GamePage extends AppCompatActivity {
             new Handler().postDelayed(this::mistyTurn, 1500);
         }
     }
+
+    //the method that sets up the grid with the numbers/letters
+    private void setupGrid() {
+        // Clear existing row and column labels to avoid duplication
+        leftRowNumbers.removeAllViews();
+        leftColumnNumbers.removeAllViews();
+        rightRowNumbers.removeAllViews();
+        rightColumnNumbers.removeAllViews();
+
+        // Adjust padding dynamically based on difficulty
+        int columnPadding, rowPadding;
+        if (ROWS == 7) { // Hard mode (7x7)
+            columnPadding = 40; // Reduce column padding
+            rowPadding = 30;    // Reduce row padding
+        } else if (ROWS == 5) { // Medium mode (5x5)
+            columnPadding = 60;
+            rowPadding = 40;
+        } else { // Easy mode (3x3)
+            columnPadding = 80;
+            rowPadding = 50;
+        }
+
+        // Add column numbers
+        for (int i = 0; i < COLUMNS; i++) {
+            TextView colLabelLeft = new TextView(this);
+            colLabelLeft.setText(String.valueOf(i));
+            colLabelLeft.setGravity(Gravity.CENTER);
+            colLabelLeft.setTextColor(Color.WHITE);
+            colLabelLeft.setTextSize(22); // Reduce text size slightly
+            colLabelLeft.setPadding(columnPadding, 10, columnPadding, 10);
+            leftColumnNumbers.addView(colLabelLeft);
+
+            TextView colLabelRight = new TextView(this);
+            colLabelRight.setText(String.valueOf(i));
+            colLabelRight.setTextSize(22f);
+            colLabelRight.setTextColor(Color.WHITE);
+            colLabelRight.setGravity(Gravity.CENTER);
+            colLabelRight.setPadding(columnPadding, 10, columnPadding, 10);
+            rightColumnNumbers.addView(colLabelRight);
+        }
+
+        // Add row numbers
+        for (int i = 0; i < ROWS; i++) {
+            TextView rowLabelLeft = new TextView(this);
+            rowLabelLeft.setText(String.valueOf(i));
+            rowLabelLeft.setTextSize(25f);
+            rowLabelLeft.setTextColor(Color.WHITE);
+
+            // Adjust padding dynamically
+            rowPadding = (ROWS == 3) ? 50 : (ROWS == 5) ? 40 : 20;
+            rowLabelLeft.setPadding(50, rowPadding, 10, rowPadding);
+            leftRowNumbers.addView(rowLabelLeft);
+
+            TextView rowLabelRight = new TextView(this);
+            rowLabelRight.setText(String.valueOf(i));
+            rowLabelRight.setTextSize(25f);
+            rowLabelRight.setTextColor(Color.WHITE);
+            rowLabelRight.setPadding(50, rowPadding, 10, rowPadding);
+            rightRowNumbers.addView(rowLabelRight);
+        }
+    }
+
+
 
     private char flipButton(int row, int col, boolean isLeftBoard) {
         Button[][] buttons = isLeftBoard ? leftButtons : rightButtons;
