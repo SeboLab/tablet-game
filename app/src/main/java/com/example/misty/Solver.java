@@ -16,6 +16,10 @@ public class Solver {
     }
 
     public int[] getMove(String difficulty) {
+        if (difficulty == null || difficulty.equals("NULL")) {
+            return basicSolver();
+        }
+
         switch (difficulty) {
             case "Medium":
                 return mediumSolver();

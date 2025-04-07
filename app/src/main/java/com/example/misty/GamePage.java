@@ -43,6 +43,7 @@ public class GamePage extends AppCompatActivity {
     private Board rightGame;
     private boolean interrupt = false;
 
+
     private int leftGoldCount = 0;
     private int rightGoldCount = 0;
 
@@ -54,6 +55,7 @@ public class GamePage extends AppCompatActivity {
     private LinearLayout rightRowNumbers, rightColumnNumbers;
 
 
+    private boolean mistyTurnOver = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,7 +130,7 @@ public class GamePage extends AppCompatActivity {
 
         new Thread(() -> {
             MistyConnection misty = new MistyConnection("192.168.1.143", 80);
-            misty.speak("Please choose a row", false, "2");
+            misty.speak("Please choose a row and column", false, "2");
         }).start();
 
         generateShuffledNumbers(leftGame, leftNumbers, leftRevealed);
@@ -171,6 +173,7 @@ public class GamePage extends AppCompatActivity {
         }
 
         flipRandomSquare(); // Continue Misty's turn
+        mistyTurnOver = true;
     }
 
     private void flipRandomSquare() {
@@ -181,7 +184,9 @@ public class GamePage extends AppCompatActivity {
 
         do {
             Solver solver = new Solver(ROWS, COLUMNS, rightNumbers, rightRevealed);
+
             int[] move = solver.getMove(getIntent().getStringExtra("difficulty"));
+
 
             randRow = move[0];
             randCol = move[1];
@@ -194,6 +199,7 @@ public class GamePage extends AppCompatActivity {
         new Thread(() -> {
             MistyConnection misty = new MistyConnection("192.168.1.143", 80);
             misty.speak("Misty has chosen Row " + finalRandRow + " and Column " + finalRandCol, false, "2");
+            runOnUiThread(() -> mistyTurnOver = true);
         }).start();
     }
 
@@ -259,8 +265,10 @@ public class GamePage extends AppCompatActivity {
     //the format needs to be in (row, column) or (column, row) where both has to be valid
     //row is displayed in letters and column are numbers
     private void buttonClick(int row, int column) {
-        char v = flipButton(row, column, true);
+        if (!mistyTurnOver) return; // Ignore input if it's Misty's turn
 
+        char v = flipButton(row, column, true);
+        mistyTurnOver = false;
         new Thread(() -> {
             MistyConnection misty = new MistyConnection("192.168.1.143", 80);
             misty.speak("You have picked Row " + row + " and Column " + column, false, "2");
@@ -369,17 +377,25 @@ public class GamePage extends AppCompatActivity {
                 }
                 buttons[row][col].setBackgroundResource(R.drawable.gold); // this will show gold image
                 new Handler().postDelayed(() -> resetBoard(isLeftBoard), 3000);
+                mistyTurnOver = true;
+
             } else if (numbers[row][col] == 'B') {
                 buttons[row][col].setBackgroundResource(R.drawable.bomb); // this will show bomb image
                 new Handler().postDelayed(() -> resetBoard(isLeftBoard), 3000);
+                mistyTurnOver = true;
+
             } else {
                 buttons[row][col].setText(String.valueOf(numbers[row][col])); // this will show the number of squares away from the bomb
                 buttons[row][col].setTextColor(Color.BLACK);
                 buttons[row][col].setBackgroundColor(Color.LTGRAY);
+                mistyTurnOver = true;
+
             }
+
             return numbers[row][col];
         }
         return 'a';
+
     }
 
     //private void resetGame() {
