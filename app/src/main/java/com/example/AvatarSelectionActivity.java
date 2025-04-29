@@ -42,7 +42,7 @@ public class AvatarSelectionActivity extends AppCompatActivity implements  TCPCl
 
         Button blueAvatarButton = findViewById(R.id.blueAvatarButton);
 
-        Button nextPageButton = findViewById(R.id.nextPageButton);
+        //Button nextPageButton = findViewById(R.id.nextPageButton);
 
         // Set click listeners for the avatar buttons
         redAvatarButton.setOnClickListener(v -> {

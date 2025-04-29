@@ -1,17 +1,25 @@
 package com.example.misty;
 
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.widget.GridLayout;
+import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Button;
+import android.widget.GridLayout;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.misty.Socketconnection.TCPClient;
+import com.example.misty.Socketconnection.TCPClientOwner;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import android.content.Intent;
 
-public class PracticeActivity extends AppCompatActivity {
+public class PracticeActivity extends AppCompatActivity implements TCPClientOwner {
     private static final int ROWS = 3;
     private static final int COLUMNS = 3;
 
@@ -31,6 +39,10 @@ public class PracticeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_practice);
 
+        if (TCPClient.singleton != null) {
+            TCPClient.singleton.setSessionOwner(this);
+        }
+
         GridLayout leftGridLayout = findViewById(R.id.leftBoard);
         GridLayout rightGridLayout = findViewById(R.id.rightBoard);
 
@@ -39,18 +51,12 @@ public class PracticeActivity extends AppCompatActivity {
         rightGridLayout.setRowCount(ROWS);
         rightGridLayout.setColumnCount(COLUMNS);
 
-        new Thread(() -> {
-            MistyConnection misty = new MistyConnection("192.168.1.143", 80);
-            misty.speak("Please choose a square", true, "2");
-        }).start();
-
         generateShuffledNumbers(leftGame, leftNumbers, leftRevealed);
         generateShuffledNumbers(rightGame, rightNumbers, rightRevealed);
 
         initializeBoard(leftGridLayout, leftButtons, leftNumbers, leftRevealed, true);
         initializeBoard(rightGridLayout, rightButtons, rightNumbers, rightRevealed, false);
 
-        // Back to Home Button
         Button backHomeButton = findViewById(R.id.backHomeButton);
         backHomeButton.setOnClickListener(v -> {
             Intent intent = new Intent(PracticeActivity.this, HomeActivity.class);
@@ -80,7 +86,7 @@ public class PracticeActivity extends AppCompatActivity {
             for (int col = 0; col < COLUMNS; col++) {
                 final int r = row, c = col;
                 buttons[row][col] = new Button(this);
-                buttons[row][col].setText(""); // Initially blank
+                buttons[row][col].setText("");
                 buttons[row][col].setTextSize(24);
 
                 GridLayout.LayoutParams params = new GridLayout.LayoutParams();
@@ -91,10 +97,8 @@ public class PracticeActivity extends AppCompatActivity {
                 buttons[row][col].setLayoutParams(params);
 
                 if (isLeftBoard) {
-                    // Allow human to play on left board
                     buttons[row][col].setOnClickListener(v -> buttonClick(r, c));
                 } else {
-                    // Disable interaction on Misty’s board
                     buttons[row][col].setEnabled(false);
                 }
 
@@ -104,21 +108,8 @@ public class PracticeActivity extends AppCompatActivity {
     }
 
     private void buttonClick(int row, int column) {
-        char v = flipButton(row, column, true, true); // Human plays on left board
-        new Thread(() -> {
-            MistyConnection misty = new MistyConnection("192.168.1.143", 80);
-            misty.speak("You have picked Row " + row + " and Column " + column, false, "2");
-
-            if (v == 'G') {
-                misty.speak("You have hit gold! Congrats, you have won.", false, "2");
-            } else if (v == 'B') {
-                misty.speak("I'm sorry, you hit a bomb. You have lost.", false, "2");
-            } else {
-                misty.speak("You are " + v + " square away from the bomb!", false, "2");
-            }
-        }).start();
-
-        // Misty plays immediately after human's move
+        char v = flipButton(row, column, true, true);
+        sendPracticeMessage("Coutcome;" + v + ";");
         new Handler().postDelayed(this::mistyTurn, 6000);
     }
 
@@ -128,7 +119,7 @@ public class PracticeActivity extends AppCompatActivity {
         boolean[][] revealed = isLeftBoard ? leftRevealed : rightRevealed;
 
         if (!revealed[row][col]) {
-            buttons[row][col].setText(String.valueOf(numbers[row][col])); // Show number
+            buttons[row][col].setText(String.valueOf(numbers[row][col]));
             revealed[row][col] = true;
 
             if (numbers[row][col] == 'G') {
@@ -143,36 +134,44 @@ public class PracticeActivity extends AppCompatActivity {
         }
         return 'a';
     }
-    private void mistyTurn(){
-//        check if it has been 5 minutes
 
-//        if not run the turn
-        flipRandomSquare();
-    }
-    private void flipRandomSquare() {
-        System.out.println("Misty is playing...");
-
+    private void mistyTurn() {
         Random random = new Random();
         int randRow, randCol;
 
         do {
             randRow = random.nextInt(ROWS);
             randCol = random.nextInt(COLUMNS);
-        } while (rightRevealed[randRow][randCol]); // Ensure Misty doesn't flip an already revealed tile
+        } while (rightRevealed[randRow][randCol]);
 
-        flipButton(randRow, randCol, false, false); // Misty plays on right board
+        char mv = flipButton(randRow, randCol, false, false);
+        if (mv != 'a') {
+            sendPracticeMessage("Moutcome;" + mv + ";");
+        }
+    }
 
-        int finalRandRow = randRow;
-        int finalRandCol = randCol;
-        new Thread(() -> {
-            MistyConnection misty = new MistyConnection("192.168.1.143", 80);
-            misty.speak("Misty has chosen Row " + finalRandRow + " and Column " + finalRandCol, false, "2");
-        }).start();
+    private void sendPracticeMessage(String msg) {
+        if (TCPClient.singleton != null) {
+            new Thread(() -> {
+                Log.d("PracticeActivity", "Sending: " + msg);
+                TCPClient.singleton.sendMessage(msg);
+            }).start();
+        }
     }
 
     private void resetGame() {
         Intent intent = new Intent(PracticeActivity.this, PracticeActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    @Override
+    public void messageReceived(String message) {
+        Log.e("PracticeActivity", "Message received from server: " + message);
+    }
+
+    @Override
+    public void disableButtons() {
+        // Optional: implement logic to disable buttons if needed
     }
 }

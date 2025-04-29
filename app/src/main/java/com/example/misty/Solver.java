@@ -16,18 +16,27 @@ public class Solver {
     }
 
     public int[] getMove(String difficulty) {
+
         if (difficulty == null || difficulty.equals("NULL")) {
             return basicSolver();
         }
-
-        switch (difficulty) {
-            case "Medium":
-                return mediumSolver();
-            case "Hard":
-                return hardSolver();
-            default:
-                return basicSolver();
+        else if (difficulty.equals("Medium")) {
+            return mediumSolver();
         }
+        else if (difficulty.equals("Hard")) {
+            return hardSolver();
+        }
+        else {
+            return basicSolver();
+        }
+        //switch (difficulty) {
+           // case "Medium":
+            //    return mediumSolver();
+            //case "Hard":
+            //    return hardSolver();
+            //default:
+            //    return basicSolver();
+        //}
     }
 
     private int[] basicSolver() {

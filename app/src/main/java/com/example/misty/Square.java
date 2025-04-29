@@ -4,7 +4,7 @@ public class Square {
     private boolean visible;
     private char value;
     //    place holder for image ect.
-    public  Square(char value)
+    public Square(char value)
     {
         this.visible = false;
         this.value = value;

@@ -6,14 +6,13 @@
     android:orientation="vertical"
     android:gravity="center"
     android:padding="24dp"
-    android:background="@android:color/black">
+    android:background="@android:color/white">
 
     <TextView
         android:id="@+id/avatarText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Choose Your Avatar"
-        android:textColor="@android:color/white"
         android:textSize="24sp"
         android:textStyle="bold"
         android:layout_marginBottom="24dp"/>
@@ -50,4 +49,12 @@
         android:padding="12dp"
         android:backgroundTint="@android:color/holo_blue_light"
         android:textColor="@android:color/white" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Next Page"
+        android:id="@+id/nextPageButton"
+        android:layout_row="1"
+        android:layout_column="1" />
 </LinearLayout>

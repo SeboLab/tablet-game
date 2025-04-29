@@ -10,7 +10,7 @@ public class Board {
     public int goldColumn;
 
 
-    public Board ( int rows, int columns) {
+    public Board(int rows, int columns) {
         this.rows = rows;
         this.columns = columns;
         this.board = new Square[rows][columns];
@@ -31,7 +31,7 @@ public class Board {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < columns; j++) {
                 if (board[i][j] == null) {
-                    board[i][j] = new Square ((char) ('0' + distanceFromBomb(i, j)));
+                    board[i][j] = new Square ((char) ('0' + distanceFromGold(i, j)));
                 }
             }
         }
