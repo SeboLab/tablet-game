@@ -7,5 +7,7 @@ public interface TCPClientOwner {
     Looper getMainLooper();
     void messageReceived(String message);
 
+    //void getSessionOwner();
+
     void disableButtons();
 }

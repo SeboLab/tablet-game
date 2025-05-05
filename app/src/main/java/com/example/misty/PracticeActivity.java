@@ -39,9 +39,6 @@ public class PracticeActivity extends AppCompatActivity implements TCPClientOwne
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_practice);
 
-        if (TCPClient.singleton != null) {
-            TCPClient.singleton.setSessionOwner(this);
-        }
 
         GridLayout leftGridLayout = findViewById(R.id.leftBoard);
         GridLayout rightGridLayout = findViewById(R.id.rightBoard);

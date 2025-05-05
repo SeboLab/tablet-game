@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
-public class GamePage extends AppCompatActivity implements TCPClientOwner {
+public class GamePage extends AppCompatActivity implements TCPClient.OnMessageReceived {
     private static int ROWS;
     private static int COLUMNS;
 
@@ -50,7 +50,9 @@ public class GamePage extends AppCompatActivity implements TCPClientOwner {
     private int rightGoldCount = 0;
 
     //variable for TCP connection, outcome
-   // private String choiceOutcome;
+    // private String choiceOutcome;
+
+    private TCPClient mTcpClient = TCPClient.getInstance();
 
     private boolean mistyTurnOver = true;
 
@@ -61,9 +63,8 @@ public class GamePage extends AppCompatActivity implements TCPClientOwner {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (TCPClient.singleton != null) {
-            TCPClient.singleton.setSessionOwner(this);
-        }
+        Log.d("GamePage", "onCreate called - mTcpClient instance: " + mTcpClient.toString());
+        mTcpClient.addMessageListener(this);
         setContentView(R.layout.game_board);
 
         TextView textViewMode = findViewById(R.id.textViewMode);
@@ -146,17 +147,68 @@ public class GamePage extends AppCompatActivity implements TCPClientOwner {
             finish();
         });
 
-        startGameTimer();
     }
 
-    private void startGameTimer() {
-        GameTimer.getInstance().startTimer(() -> {
-            runOnUiThread(() -> {
-                System.out.println("");
-                Toast.makeText(GamePage.this, "Hit Timer.", Toast.LENGTH_SHORT).show();
-                interrupt = true; // Set flag for Misty's turn
-            });
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mTcpClient.removeMessageListener(this);
+    }
+
+    @Override
+    public void messageReceived(String message) {
+        runOnUiThread(() -> {
+            Log.d("GamePage", "message received: " + message);
+            String[] parts = message.split(";");
+            Log.d("GamePage", "messageReceived: parts length: " + parts.length);
+            if (parts.length == 2) {
+                Log.d("GamePage", "messageReceived: inside if parts.length ==2: ");
+                String type = parts[0].trim();
+                Log.d("GamePage", "messageReceived: type: " + type);
+                // Extract row and column from the coordinates string
+                if (type.equals("Mistychoice")) {
+                    Log.d("GamePage", "messageReceived: inside if type equals MistyChoice: ");
+                    String coordinates = parts[1].trim();
+                    Log.d("GamePage", "messageReceived: coordinates: " + coordinates);
+                    // Extract row and column from the coordinates string
+                    if (!coordinates.isEmpty()) {
+                        try {
+                            // Find the first digit (row)
+                            int firstDigitIndex = 0;
+                            while (firstDigitIndex < coordinates.length() && !Character.isDigit(coordinates.charAt(firstDigitIndex))) {
+                                firstDigitIndex++;
+                            }
+                            // Find the last digit (column)
+                            int lastDigitIndex = coordinates.length() - 1;
+                            while (lastDigitIndex >= 0 && !Character.isDigit(coordinates.charAt(lastDigitIndex))) {
+                                lastDigitIndex--;
+                            }
+                            // Extract row and col as integers
+                            specifiedRow = Integer.parseInt(coordinates.substring(firstDigitIndex,firstDigitIndex+1)); // Parse the first character as row
+                            specifiedCol = Integer.parseInt(coordinates.substring(lastDigitIndex, lastDigitIndex + 1)); // Parse the second character as column
+                            Log.e("GamePage", "flipSquare: Checking row: " + specifiedRow + " and column: " + specifiedCol);
+                            mistyTurn();
+                        } catch (NumberFormatException e) {
+                            Log.e("GamePage", "Error parsing row or col", e);
+                        }
+                    }
+                }
+            }
         });
+    }
+
+    private class SendMessageTask extends AsyncTask<String, Void, Void> {
+        @Override
+        protected Void doInBackground(String... messages) {
+            String message = messages[0];
+            // Call the method to send the message through the TCPClient
+            mTcpClient.sendMessage(message);
+            return null;
+        }
+    }
+
+    public void sendMessageToPython(String message) {
+        new SendMessageTask().execute(message);
     }
 
     private void performTimedAction() {
@@ -164,27 +216,18 @@ public class GamePage extends AppCompatActivity implements TCPClientOwner {
     }
 
     public void mistyTurn() {
-       // Log.e("GamePage", "mistyTurn: Called");
-        if (interrupt) {
-       //     Log.e("GamePage", "mistyTurn: Interrupt is true");
-            System.out.println("Misty's turn started.");
-            performTimedAction();
-            interrupt = false; // Reset interrupt flag
-            GameTimer.getInstance().resetTimer(); // Reset the timer
-            startGameTimer(); // Restart the game timer
-        }
+        // Log.e("GamePage", "mistyTurn: Called");
         if (specifiedRow != -1 && specifiedCol != -1) {
             // Use the specified row and column
             flipSpecifiedSquare(specifiedRow, specifiedCol);
             // Reset the specified row and column
             specifiedRow = -1;
             specifiedCol = -1;
+            mistyTurnOver = true;
 
         } else {
-            // No coordinates received, fall back to random
-            flipRandomSquare(); // Continue Misty's turn
+            mistyTurnOver = false;
         }
-        mistyTurnOver = true;
     }
 
     private void flipSpecifiedSquare(int row, int col) {
@@ -199,7 +242,7 @@ public class GamePage extends AppCompatActivity implements TCPClientOwner {
     }
 
     private void flipRandomSquare() {
-       // Log.e("GamePage", "flipRandomSquare: Called");
+        // Log.e("GamePage", "flipRandomSquare: Called");
         System.out.println("Misty is playing...");
 
         Random random = new Random();
@@ -211,43 +254,31 @@ public class GamePage extends AppCompatActivity implements TCPClientOwner {
 
             randRow = move[0];
             randCol = move[1];
-        //    Log.e("GamePage", "flipRandomSquare: Checking row: " + randRow + " and column: " + randCol);
+            //    Log.e("GamePage", "flipRandomSquare: Checking row: " + randRow + " and column: " + randCol);
         } while (rightRevealed[randRow][randCol]);
 
         char mv = flipButton(randRow, randCol, false); // Misty plays on right board
         //flipButton(randRow, randCol, false); // Misty plays on right board
 
-      //  int finalRandRow = randRow;
-      //  int finalRandCol = randCol;
+        //  int finalRandRow = randRow;
+        //  int finalRandCol = randCol;
         //we check that v was not equal to a, since a is returned if the button has already been clicked.
         if (mv != 'a') {
             sendMOutcomeOverTCP(mv); // Send the value over TCP
         }
 
     }
-    private void sendMOutcomeOverTCP(char mv) {
-        // Check if TCPClient is initialized
-        if (TCPClient.singleton != null) {
-            //prepare list for TextUtils.Join
-            List<String> buttonChoiceList = new ArrayList<>();
-            buttonChoiceList.add(String.valueOf(mv));
 
-            // Join the button choice into a string
-            String buttonIdsString = TextUtils.join(",", buttonChoiceList) + ";";
-            // Send the choice via TCP
-            new Thread(() -> {
-                if (TCPClient.singleton != null) {
-                    System.out.println("message being sent: Moutcome;" + buttonIdsString);
-                    TCPClient.singleton.sendMessage("Moutcome;" + buttonIdsString);
-                    System.out.println("Moutcome;" + buttonIdsString);
-                }
-            }).start();
-        } else {
-            // Handle case where TCPClient is not available (optional)
-            System.out.println("TCPClient not initialized. Cannot send choice.");
-        }
+    private void sendMOutcomeOverTCP(char mv) {
+        // Prepare the message string
+        String message = "Moutcome;" + mv + ";";
+
+        // Send the message using the existing sendMessageToPython method
+        System.out.println("message being sent: " + message);
+        sendMessageToPython(message);
+
+        System.out.println(message);
     }
-    //th
 
     private void generateShuffledNumbers(Board board, char[][] numbers, boolean[][] revealed) {
         List<Character> values = new ArrayList<>();
@@ -312,42 +343,28 @@ public class GamePage extends AppCompatActivity implements TCPClientOwner {
     private void buttonClick(int row, int column) {
         if (!mistyTurnOver) return;
         char v = flipButton(row, column, true);
-        mistyTurnOver = false;
+        mistyTurnOver = false; // Misty's turn now
         //we check that v was not equal to a, since a is returned if the button has already been clicked.
         if (v != 'a') {
             sendCOutcomeOverTCP(v); // Send the value over TCP
         }
 
-        // if (v != 'G' && v != 'B') {
-            new Handler().postDelayed(this::mistyTurn, 5000);
-        // }
     }
 
     private void sendCOutcomeOverTCP(char v) {
-        // Check if TCPClient is initialized
-        if (TCPClient.singleton != null) {
-            //prepare list for TextUtils.Join
-            List<String> buttonChoiceList = new ArrayList<>();
-            buttonChoiceList.add(String.valueOf(v));
+        if (mTcpClient != null) {
+            // Prepare the message string
+            String messageToSend = "Coutcome;" + v + ";";
 
-            // Join the button choice into a string
-            String buttonIdsString = TextUtils.join(",", buttonChoiceList) + ";";
-            // Send the choice via TCP
-            new Thread(() -> {
-                if (TCPClient.singleton != null) {
-                    System.out.println("message being sent: Coutcome;" + buttonIdsString);
-                    TCPClient.singleton.sendMessage("Coutcome;" + buttonIdsString);
-                    System.out.println("Coutcome;" + buttonIdsString);
-                    // Send the "Misty turn started" message
-                    TCPClient.singleton.sendMessage("Mistyturn;" + "started");
-                    System.out.println("Mistyturn;" + "started");
-                }
-            }).start();
-        } else {
-            // Handle case where TCPClient is not available (optional)
-            System.out.println("TCPClient not initialized. Cannot send choice.");
+            sendMessageToPython(messageToSend);
+            Log.i("GamePage", "message being sent: " + messageToSend);
+
+            String MmessageToSend = "Mistyturn;" + "started";
+            sendMessageToPython(MmessageToSend);
+            Log.i("GamePage", "message being sent: " + MmessageToSend);
         }
     }
+
     //the method that sets up the grid with the numbers/letters
     private void setupGrid() {
         // Clear existing row and column labels to avoid duplication
@@ -410,7 +427,6 @@ public class GamePage extends AppCompatActivity implements TCPClientOwner {
     }
 
 
-
     private char flipButton(int row, int col, boolean isLeftBoard) {
         Button[][] buttons = isLeftBoard ? leftButtons : rightButtons;
         char[][] numbers = isLeftBoard ? leftNumbers : rightNumbers;
@@ -428,8 +444,7 @@ public class GamePage extends AppCompatActivity implements TCPClientOwner {
                         leftGoldCountText.setText(" " + leftGoldCount);
                     }
 
-                }
-                else {
+                } else {
                     rightGoldCount++;
                     if (rightGoldCountText != null) {
                         rightGoldCountText.setText(" " + rightGoldCount);
@@ -455,10 +470,10 @@ public class GamePage extends AppCompatActivity implements TCPClientOwner {
     }
 
     //private void resetGame() {
-        //Intent intent = new Intent(GamePage.this, GamePage.class);
-        //intent.putExtra("difficulty", getIntent().getStringExtra("difficulty"));
-        //startActivity(intent);
-       // finish();
+    //Intent intent = new Intent(GamePage.this, GamePage.class);
+    //intent.putExtra("difficulty", getIntent().getStringExtra("difficulty"));
+    //startActivity(intent);
+    // finish();
     //}
 
     //utilized the boolean flag isLeftBoard that was in the flipButton
@@ -480,8 +495,7 @@ public class GamePage extends AppCompatActivity implements TCPClientOwner {
             }
 
 
-        }
-        else {
+        } else {
             rightGame = new Board(ROWS, COLUMNS);
             generateShuffledNumbers(rightGame, rightNumbers, rightRevealed);
 
@@ -495,44 +509,5 @@ public class GamePage extends AppCompatActivity implements TCPClientOwner {
         }
 
     }
-    //@Override
-    public void messageReceived(String message) {
-        Log.e("Game Page", "Message received from server: " + message);
-        String[] parts = message.split(";");
-        if (parts.length == 2) {
-            String type = parts[0];
-            // Extract row and column from the coordinates string
-            if (type.equals("Mistychoice")) {
-                String coordinates = parts[1];
-                // Extract row and column from the coordinates string
-                if (coordinates.length() == 2) {
-                    specifiedRow = Integer.parseInt(coordinates.substring(0, 1)); // Parse the first character as row
-                    specifiedCol = Integer.parseInt(coordinates.substring(1, 2)); // Parse the second character as column
 
-                    Log.e("GamePage", "flipRandomSquare: Checking row: " + specifiedRow + " and column: " + specifiedCol);
-                }
-            }
-        }
-        //System.out.println("highlight"+message);
-        // Global.processMessage(message, buttonContainer);  // Assuming buttonContainer is defined elsewhere
-    }
-
-    @Override
-    public void disableButtons() {
-        // Implement button disabling logic here if needed
-    }
-
-    public class sendMessage extends AsyncTask<String, Void, Void> {
-        @SuppressWarnings("deprecation")
-        @Override
-        protected Void doInBackground(String... message) {
-            String message1 = message[0];
-            if (TCPClient.singleton != null) {
-                TCPClient.singleton.sendMessage(message1);
-            }
-            return null;
-        }
-    }
 }
-
-

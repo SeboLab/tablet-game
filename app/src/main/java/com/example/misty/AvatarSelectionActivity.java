@@ -2,6 +2,7 @@ package com.example.misty;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 import android.text.TextUtils;
@@ -15,21 +16,22 @@ import com.example.misty.Socketconnection.TCPClientOwner;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AvatarSelectionActivity extends AppCompatActivity implements  TCPClientOwner {
+public class AvatarSelectionActivity extends AppCompatActivity implements  TCPClient.OnMessageReceived {
+
+    private TCPClient mTcpClient = TCPClient.getInstance();
     private String selectedDifficulty;
     private String selectedAvatar; // Variable to store the chosen avatar
     private boolean isRedAvatarSelected;
 
-    //private Button nextPageButton; // declare at class level
+    private Button nextPageButton; // declare at class level
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_avatar_selection);
 
-        if (TCPClient.singleton != null) {
-            TCPClient.singleton.setSessionOwner(this);
-        }
+        Log.d("AvatarSelectionActivity", "onCreate called - mTcpClient instance: " + mTcpClient.toString());
+        mTcpClient.addMessageListener(this);
 
         selectedDifficulty = getIntent().getStringExtra("difficulty");
 
@@ -58,6 +60,7 @@ public class AvatarSelectionActivity extends AppCompatActivity implements  TCPCl
             intent.putExtra("avatar", selectedAvatar);
             intent.putExtra("difficulty", selectedDifficulty);
             startActivity(intent);
+            finish();
         });
         // disable the next page button by doing false
         nextPageButton.setClickable(true);
@@ -78,39 +81,61 @@ public class AvatarSelectionActivity extends AppCompatActivity implements  TCPCl
             buttonChoiceList.add(selectedAvatar);
             // Join the button choice into a string
             String buttonIdsString = TextUtils.join(",", buttonChoiceList) + ";";
-
+            // message to send to python
+            String message = "avatar;"+buttonIdsString;
             // Send the avatar choice via TCP
-            new Thread(() -> {
-                if (TCPClient.singleton != null) {
-                    System.out.println("message being sent: avatar;" + buttonIdsString);
-                    TCPClient.singleton.sendMessage("avatar;" + buttonIdsString);
-                    System.out.println("avatar;" + buttonIdsString);
-                }
-            }).start();
+            Log.d("AvatarSelectionActivity", "sendAvatarChoice: sending " + message);
+            sendMessageToPython(message);
+            Log.d("AvatarSelectionActivity", "sendAvatarChoice: message sent" + message);
         }
+        else {
+            Log.e("AvatarSelectionActivity", "Connection not established yet!");
+        }
+    }
+    public void sendMessageToPython(String message) {
+        Log.d("AvatarSelectionActivity", "sendMessageToPython called, message: " + message);
+        new SendMessageTask().execute(message);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mTcpClient.removeMessageListener(this);
     }
 
     @Override
     public void messageReceived(String message) {
-        System.out.println(message);
-        // Global.processMessage(message, buttonContainer);  // Assuming buttonContainer is defined elsewhere
+        runOnUiThread(() -> {
+            // Update UI or perform actions based on the received message
+            Log.d("AvatarSelectionActivity", "Message received: " + message);
+            // Example: If the message contains "Start", change a TextView
+            if (message.contains("Start")) {
+                // TextView textView = findViewById(R.id.someTextView);
+                // textView.setText("Game Started!");
+            }
+        });
     }
 
-    @Override
+    //  @Override
     public void disableButtons() {
         // Implement button disabling logic here if needed
     }
 
-    public class sendMessage extends AsyncTask<String, Void, Void> {
-        @SuppressWarnings("deprecation")
+    private class SendMessageTask extends AsyncTask<String, Void, Void> {
         @Override
-        protected Void doInBackground(String... message) {
-            String message1 = message[0];
-            if (TCPClient.singleton != null) {
-                TCPClient.singleton.sendMessage(message1);
-            }
+        protected void onPreExecute(){
+            Log.d("SendMessageTask", "onPreExecute called");
+        }
+        protected Void doInBackground(String... messages) {
+            Log.d("SendMessageTask", "doInBackground called");
+            String message = messages[0];
+            mTcpClient.sendMessage(message);
             return null;
         }
+        @Override
+        protected void onPostExecute(Void result) {
+            Log.d("SendMessageTask", "onPostExecute called");
+        }
     }
-}
 
+}

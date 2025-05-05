@@ -7,211 +7,152 @@ import com.example.misty.HomeActivity;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileDescriptor;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TCPClient {
 
     private String serverMessage;
-    //message to send to  the server
-
-    public static final String SERVERIP = "192.168.1.105";
-
-    //public static final String SERVERIP = "10.0.0.10";
-
-    // your computer IP address
+    // Constants for default server IP and port
+    public static final String SERVERIP = "192.168.1.148";
     public static final int SERVERPORT = 8080;
-    private OnMessageReceived mMessageListener = null;
-    //while this is true, the server will continue running
-    private boolean mRun = false;
-    private String ipAddressVar;
+
+    private String ipAddress;
     private int ipPortVar;
-    private HomeActivity owner;
-    private TCPClientOwner sessionOwner;
+    private boolean running = false;
+    private PrintWriter bufferOut;
+    private BufferedReader bufferIn;
+    private Socket socket;
+    private List<OnMessageReceived> messageListeners = new ArrayList<>(); // List of listeners
 
-    //used to send messages
-    PrintWriter out;
-    // used to read messages from the server
-    BufferedReader in;
+    private boolean isConnected = false;
+    public static TCPClient singleton = null; // Singleton instance
+    private TCPClient() {
+        // Private constructor to enforce singleton pattern
+        // Initialize with default values
+        this.ipAddress = SERVERIP;
+        this.ipPortVar = SERVERPORT;
+    }
+    public static TCPClient getInstance() {
+        if (singleton == null)
+            singleton = new TCPClient();
+        return singleton;
+    }
+    //method to add listeners
+    public void addMessageListener(OnMessageReceived listener) {
 
-    public static TCPClient singleton = null;
-
-    /**
-     *  Constructor of the class. OnMessagedReceived listens for the messages received from server
-     */
-    public TCPClient(OnMessageReceived listener, HomeActivity owner) {
-        mMessageListener = listener;
-        ipAddressVar = null;
-        this.owner = owner;
-        this.sessionOwner = null;
+        messageListeners.add(listener);
+    }
+    //method to remove listeners
+    public void removeMessageListener(OnMessageReceived listener) {
+        messageListeners.remove(listener);
+    }
+    public interface OnMessageReceived {
+        void messageReceived(String message);
+    }
+    private void sendMessageToListeners(String message) {
+        for (OnMessageReceived listener : messageListeners) {
+            listener.messageReceived(message);
+        }
+    }
+    public void setIpAddress(String ipAddress) {
+        //check if its empty, if so, use the default one
+        if (ipAddress.isEmpty())
+            this.ipAddress= SERVERIP;
+        else
+            this.ipAddress = ipAddress;
     }
 
-    public void setSessionOwner(TCPClientOwner sessionOwner){
-
-        this.sessionOwner = sessionOwner;
+    public void setIpPortVar(int ipPortVar) {
+        //check if its 0, if so, use default one
+        if(ipPortVar==0)
+            this.ipPortVar= SERVERPORT;
+        else
+            this.ipPortVar = ipPortVar;
     }
 
-    /**
-     * Sends the message entered by client to the server
-     * @param message text entered by client
-     */
-    public void sendMessage(final String message){
-        if (out != null && !out.checkError()) {
-            if (sessionOwner != null) {
-                // notify the owner that the message is being sent
-                new DisableButtonsTask().execute(sessionOwner);
-                        }
-            out.println(message);
-            out.flush();
-                    }
-                }
-
-    public void stopClient(){
-
-        mRun = false;
+    public void sendMessage(String message) {
+        Log.d("TCPClient", "sendMessage called"); // Log that this method is being reached.
+        if (socket == null) {
+            Log.e("TCPClient", "Socket is null!");
+        } else {
+            Log.d("TCPClient", "Socket is not null!");
+        }
+        if (bufferOut == null) {
+            Log.e("TCPClient", "BufferOut is null!");
+        } else {
+            Log.d("TCPClient", "BufferOut is not null!");
+        }
+        if (bufferOut != null && !bufferOut.checkError()) {
+            bufferOut.println(message);
+            bufferOut.flush();
+            Log.e("TCPClient", "Sent Message: " + message);
+        } else {
+            Log.e("TCPClient", "Error: Could not send message - Output stream is null or in error state.");
+        }
     }
 
     public void run() {
-
-        mRun = true; //start the loop for receiving messages
-        Log.d("TCPClient", "run: Starting receiving thread"); // check that the thread started
+        Log.d("TCPClient", "C: Attempting to connect with IP: " + ipAddress + " and Port:" + ipPortVar);
 
         try {
             //here you must put your computer's IP address.
-            InetAddress serverAddr;
-            int ipPortVar;
+            InetAddress serverAddr = InetAddress.getByName(ipAddress);
 
-            if (ipAddressVar == null) {
-                serverAddr = InetAddress.getByName(SERVERIP);
-                ipPortVar = SERVERPORT;
-            }
-            else {
-                serverAddr = InetAddress.getByName(ipAddressVar);
-                //use ipPortVar that was input by user
-                ipPortVar = this.ipPortVar;
-            }
+            socket = new Socket(serverAddr, ipPortVar);
+            Log.d("TCPClient", "C: Connected.");
+            isConnected = true;
 
-            Log.e("TCP Client", "C: Connecting...");
-
-            //create a socket to make the connection with the server
-            Socket socket = new Socket(serverAddr, ipPortVar);
-            Log.d("TCPClient", "Socket created successfully."); // ADD THIS LOG HERE
-            //owner.connected();
-            Log.e("TCP Client", "C: Connected");
-
-            new NotifyConnectedTask().execute(owner); // Notify connected on UI thread
-
-            try {
-
-                //send the message to the server
-                out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
-
-                out.print("Session started!\r\n");
-                out.flush();
-
-                Log.e("TCP Client", "C: Sent.");
-
-                Log.e("TCP Client", "C: Done.");
-
-
-                //receive the message which the server sends back
-                in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-
-                //in this while the client listens for the messages sent by the server
-                while (mRun) {
-                    Log.d("TCPClient", "Attempting to read message..."); // ADD THIS LOG BEFORE ATTEMPTING TO READ
-                    Log.e("TCP Client", "Running");
-                    serverMessage = in.readLine();
-                    Log.e("TCP Client", "Receiving" + in);
-
-
-                    if (serverMessage != null && mMessageListener != null) {
-                        Log.d("TCPClient", "Received message: " + serverMessage); // ADD THIS LOG AFTER RECEIVING MESSAGE
-                        //call the method messageReceived from MyActivity class
-                        mMessageListener.messageReceived(serverMessage);
-                        new NotifyMessageReceivedTask().execute(sessionOwner, serverMessage);
-                    }
-                    serverMessage = null;
-
-                }
-
-
-
-                Log.e("RESPONSE FROM SERVER", "S: Received Message: '" + serverMessage + "'");
-
-
-            } catch (Exception e) {
-
-                Log.e("TCP", "S: Error", e);
-
-            } finally {
-                //the socket must be closed. It is not possible to reconnect to this socket
-                // after it is closed, which means a new socket instance has to be created.
-                socket.close();
-            }
+            // Create the buffers
+            bufferOut = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
+            Log.d("TCPClient", "bufferOut created");
+            bufferIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            Log.d("TCPClient", "bufferIn created");
+            Log.e("TCPClient", "C: Session Started!");
 
         } catch (Exception e) {
-
-            Log.e("TCP", "C: Error", e);
-
-        }
-
-    }
-
-    public String getIpAddress() {
-
-        return ipAddressVar;
-    }
-
-    public void setIpAddress(String ipAddressVar) {
-
-        this.ipAddressVar = ipAddressVar;
-    }
-
-    public int getIpPortVar() {
-
-        return ipPortVar;
-    }
-
-    public void setIpPortVar(int ipPortVar){
-
-        this.ipPortVar = ipPortVar;
-    }
-
-    public interface OnMessageReceived {
-        public void messageReceived(String message);
-    }
-    //create an async task to run the code in the main thread
-    private static class NotifyConnectedTask extends AsyncTask<HomeActivity, Void, Void> {
-        @Override
-        protected Void doInBackground(HomeActivity... owners) {
-            // Run this on the UI thread
-            owners[0].connected();
-            return null;
+            Log.e("TCPClient", "C: Error", e);
+            Log.e("TCPClient", "C: Could not Connect.");
         }
     }
-    //create an async task to run the code in the main thread
-    private static class NotifyMessageReceivedTask extends AsyncTask<Object, Void, Void> {
-        @Override
-        protected Void doInBackground(Object... params) {
-            // Run this on the UI thread
-            TCPClientOwner sessionOwner = (TCPClientOwner) params[0];
-            String message = (String) params[1];
-            sessionOwner.messageReceived(message);
-            return null;
+    public void startListening() {
+        String serverMessage;
+        try {
+            //keep listening for message while there is not an error.
+            while (true) {
+                Log.e("TCPClient", "C: Waiting for message...");
+                serverMessage = bufferIn.readLine();
+                if (serverMessage!=null){
+                    //send the message to the listeners
+                    if (!serverMessage.isEmpty()) {
+                        sendMessageToListeners(serverMessage);
+                        Log.e("TCPClient", "C: Received Message - " + serverMessage);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.e("TCPClient", "C: Error Listening", e);
+        } finally {
+            if (socket != null && !socket.isClosed()) {
+                try {
+                    //the socket must be closed. It is closed after each session
+                    socket.close();
+                } catch (IOException e) {
+                    Log.e("TCPClient", "C: Error closing socket", e);
+                }
+                Log.e("TCPClient", "C: Connection Closed.");
+            }
         }
     }
-    //create an async task to run the code in the main thread
-    private static class DisableButtonsTask extends AsyncTask<TCPClientOwner, Void, Void> {
-        @Override
-        protected Void doInBackground(TCPClientOwner... sessionOwners) {
-            // Run this on the UI thread
-            sessionOwners[0].disableButtons();
-            return null;
-        }
+    public boolean isConnected() {
+        return isConnected;
     }
 }
