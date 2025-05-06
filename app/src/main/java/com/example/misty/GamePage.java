@@ -161,41 +161,32 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
             Log.d("GamePage", "message received: " + message);
             String[] parts = message.split(";");
             Log.d("GamePage", "messageReceived: parts length: " + parts.length);
+
             if (parts.length == 2) {
-                Log.d("GamePage", "messageReceived: inside if parts.length ==2: ");
                 String type = parts[0].trim();
-                Log.d("GamePage", "messageReceived: type: " + type);
-                // Extract row and column from the coordinates string
                 if (type.equals("Mistychoice")) {
-                    Log.d("GamePage", "messageReceived: inside if type equals MistyChoice: ");
                     String coordinates = parts[1].trim();
                     Log.d("GamePage", "messageReceived: coordinates: " + coordinates);
-                    // Extract row and column from the coordinates string
-                    if (!coordinates.isEmpty()) {
+
+                    if (!coordinates.isEmpty() && coordinates.length() >= 2) {
                         try {
-                            // Find the first digit (row)
-                            int firstDigitIndex = 0;
-                            while (firstDigitIndex < coordinates.length() && !Character.isDigit(coordinates.charAt(firstDigitIndex))) {
-                                firstDigitIndex++;
-                            }
-                            // Find the last digit (column)
-                            int lastDigitIndex = coordinates.length() - 1;
-                            while (lastDigitIndex >= 0 && !Character.isDigit(coordinates.charAt(lastDigitIndex))) {
-                                lastDigitIndex--;
-                            }
-                            // Extract row and col as integers
-                            specifiedRow = Integer.parseInt(coordinates.substring(firstDigitIndex,firstDigitIndex+1)); // Parse the first character as row
-                            specifiedCol = Integer.parseInt(coordinates.substring(lastDigitIndex, lastDigitIndex + 1)); // Parse the second character as column
-                            Log.e("GamePage", "flipSquare: Checking row: " + specifiedRow + " and column: " + specifiedCol);
+                            char rowChar = coordinates.charAt(0);
+                            String colStr = coordinates.substring(1);
+
+                            specifiedRow = rowChar - 'A';
+                            specifiedCol = Integer.parseInt(colStr) - 1;
+
+                            Log.d("GamePage", "Parsed to row: " + specifiedRow + ", col: " + specifiedCol);
                             mistyTurn();
-                        } catch (NumberFormatException e) {
-                            Log.e("GamePage", "Error parsing row or col", e);
+                        } catch (NumberFormatException | IndexOutOfBoundsException e) {
+                            Log.e("GamePage", "Error parsing coordinate: " + coordinates, e);
                         }
                     }
                 }
             }
         });
     }
+
 
     private class SendMessageTask extends AsyncTask<String, Void, Void> {
         @Override
