@@ -238,19 +238,30 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
         return 'a';
     }
 
-    private void mistyTurn() {
-        Random random = new Random();
-        int randRow, randCol;
+    public void mistyTurn() {
+        // Log.e("GamePage", "mistyTurn: Called");
+        if (specifiedRow != -1 && specifiedCol != -1) {
+            // Use the specified row and column
+            flipSpecifiedSquare(specifiedRow, specifiedCol);
+            // Reset the specified row and column
+            specifiedRow = -1;
+            specifiedCol = -1;
+            mistyTurnOver = true;
 
-        do {
-            randRow = random.nextInt(ROWS);
-            randCol = random.nextInt(COLUMNS);
-        } while (rightRevealed[randRow][randCol]);
-
-        char mv = flipButton(randRow, randCol, false);
-        if (mv != 'a') {
-            sendPracticeMessage("Moutcome;" + mv + ";");
+        } else {
+            mistyTurnOver = false;
         }
+    }
+
+    private void flipSpecifiedSquare(int row, int col) {
+        System.out.println("Misty is playing by specified move...");
+        char mv = flipButton(row, col, false); // Misty plays on right board
+
+        //we check that v was not equal to a, since a is returned if the button has already been clicked.
+        if (mv != 'a') {
+            sendMOutcomeOverTCP(mv); // Send the value over TCP
+        }
+
     }
 
     private void sendPracticeMessage(String msg) {
@@ -271,15 +282,15 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
     @Override
     public void messageReceived(String message) {
         runOnUiThread(() -> {
-            Log.d("PracticePage", "message received: " + message);
+            Log.d("PracticeActivity", "message received: " + message);
             String[] parts = message.split(";");
-            Log.d("PracticePage", "messageReceived: parts length: " + parts.length);
+            Log.d("PracticeActivity", "messageReceived: parts length: " + parts.length);
 
             if (parts.length == 2) {
                 String type = parts[0].trim();
                 if (type.equals("Mistychoice")) {
                     String coordinates = parts[1].trim();
-                    Log.d("PracticePage", "messageReceived: coordinates: " + coordinates);
+                    Log.d("PracticeActivity", "messageReceived: coordinates: " + coordinates);
 
                     if (!coordinates.isEmpty() && coordinates.length() >= 2) {
                         try {
@@ -289,16 +300,17 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
                             specifiedRow = rowChar - 'A';
                             specifiedCol = Integer.parseInt(colStr) - 1;
 
-                            Log.d("PracticePage", "Parsed to row: " + specifiedRow + ", col: " + specifiedCol);
+                            Log.d("PracticeActivity", "Parsed to row: " + specifiedRow + ", col: " + specifiedCol);
                             mistyTurn();
                         } catch (NumberFormatException | IndexOutOfBoundsException e) {
-                            Log.e("PracticePage", "Error parsing coordinate: " + coordinates, e);
+                            Log.e("PracticeActivity", "Error parsing coordinate: " + coordinates, e);
                         }
                     }
                 }
             }
         });
     }
+
 
     private class SendMessageTask extends AsyncTask<String, Void, Void> {
         @Override
