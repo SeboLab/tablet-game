@@ -1,15 +1,19 @@
 package com.example.misty;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 import android.text.TextUtils;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 //TCP imports
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.widget.Toast;
+
 import com.example.misty.Socketconnection.TCPClient;
 import com.example.misty.Socketconnection.TCPClientOwner;
 
@@ -24,6 +28,18 @@ public class AvatarSelectionActivity extends AppCompatActivity implements  TCPCl
     private boolean isRedAvatarSelected;
 
     private Button nextPageButton; // declare at class level
+    private Button redAvatarButton;
+    private Button blueAvatarButton;
+
+    //keeps track of the currently selected button
+    private Button currentlySelectedAvatarButton = null;
+
+    private int defaultRedButtonColor;
+    private int defaultBlueButtonColor;
+    //private int highlightColor;
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +54,12 @@ public class AvatarSelectionActivity extends AppCompatActivity implements  TCPCl
         TextView avatarText = findViewById(R.id.avatarText);
         avatarText.setText("Choose Your Avatar for " + selectedDifficulty);
 
+
+
+        defaultRedButtonColor = ContextCompat.getColor(this, android.R.color.holo_red_light);
+        defaultBlueButtonColor = ContextCompat.getColor(this, android.R.color.holo_blue_light);
+        //highlightColor = ContextCompat.getColor(this, R.color.bright_yellow);
+
         Button redAvatarButton = findViewById(R.id.redAvatarButton);
 
         Button blueAvatarButton = findViewById(R.id.blueAvatarButton);
@@ -48,19 +70,23 @@ public class AvatarSelectionActivity extends AppCompatActivity implements  TCPCl
         redAvatarButton.setOnClickListener(v -> {
             selectedAvatar = "Red";
             sendAvatarChoice(); // Call method to send choice to TCPClient
+            //handleAvatarSelection(redAvatarButton, "Red");
         });
 
         blueAvatarButton.setOnClickListener(v -> {
             selectedAvatar = "Blue";
             sendAvatarChoice();// Call method to send choice to TCPClient
+            //handleAvatarSelection(blueAvatarButton, "Blue");
         });
 
         nextPageButton.setOnClickListener(v -> {
-            Intent intent = new Intent(AvatarSelectionActivity.this, GamePage.class);
-            intent.putExtra("avatar", selectedAvatar);
-            intent.putExtra("difficulty", selectedDifficulty);
-            startActivity(intent);
-            finish();
+            if (selectedAvatar != null) { // Only proceed if an avatar is selected
+                Intent intent = new Intent(AvatarSelectionActivity.this, GamePage.class);
+                intent.putExtra("avatar", selectedAvatar);
+                intent.putExtra("difficulty", selectedDifficulty);
+                startActivity(intent);
+                finish();
+            }
         });
         // disable the next page button by doing false
         nextPageButton.setClickable(true);
@@ -74,6 +100,9 @@ public class AvatarSelectionActivity extends AppCompatActivity implements  TCPCl
         //redAvatarButton.setOnClickListener(v -> startGame("Red"));
         //blueAvatarButton.setOnClickListener(v -> startGame("Blue"));
     }
+
+
+
     private void sendAvatarChoice() {
         if (selectedAvatar != null) {
             //prepare list for TextUtils.Join

@@ -116,19 +116,34 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
     }
 
     private void initializeBoard(GridLayout gridLayout, Button[][] buttons, char[][] numbers, boolean[][] revealed, boolean isLeftBoard) {
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        int screenWidth = displayMetrics.widthPixels;
+        int screenHeight = displayMetrics.heightPixels;
+
+        int maxBoardWidth = (int) (screenWidth * 0.9); // 90% of screen width
+        int maxBoardHeight = (int) (screenHeight * 0.6); // 60% of screen height
+
+// Adjust button size based on rows/columns, ensuring it fits within limits
+        int buttonSize = Math.min(maxBoardWidth / (COLUMNS + 1), maxBoardHeight / (ROWS + 2));
+
         for (int row = 0; row < ROWS; row++) {
             for (int col = 0; col < COLUMNS; col++) {
                 final int r = row, c = col;
                 buttons[row][col] = new Button(this);
+                //buttons[row][col].setScaleType(ImageView.ScaleType.CENTER_CROP);
+                //buttons[row][col].setAdjustViewBounds(true);
                 buttons[row][col].setText("");
-                buttons[row][col].setTextSize(24);
+                buttons[row][col].setTextSize(15);
 
                 GridLayout.LayoutParams params = new GridLayout.LayoutParams();
                 params.rowSpec = GridLayout.spec(row);
                 params.columnSpec = GridLayout.spec(col);
-                params.width = 200;
-                params.height = 200;
+                params.width = buttonSize;
+                params.height = buttonSize;
+                params.setMargins(1, 1, 1, 1);
                 buttons[row][col].setLayoutParams(params);
+
+                buttons[row][col].setBackgroundResource(R.drawable.dirt);
 
                 if (isLeftBoard) {
                     buttons[row][col].setOnClickListener(v -> buttonClick(r, c));

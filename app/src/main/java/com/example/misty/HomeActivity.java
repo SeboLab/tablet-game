@@ -46,7 +46,7 @@ public class HomeActivity extends Activity implements View.OnClickListener, TCPC
         setContentView(R.layout.activity_home);
 
         //set the ip and port of the server
-        mTcpClient.setIpAddress("10.150.93.11");
+        mTcpClient.setIpAddress("192.168.1.148");
         mTcpClient.setIpPortVar(8080);
 
         // Create the Connect Task
@@ -94,7 +94,7 @@ public class HomeActivity extends Activity implements View.OnClickListener, TCPC
 
         // setting up the ip port address and connect button
         iPandPort = findViewById(R.id.IPandPort);
-        iPandPort.setText("10.150.93.11:8080");
+        iPandPort.setText("192.168.1.148:8080");
         connectButton = findViewById(R.id.ConnectButton);
         //connectionStatus = findViewById(R.id.ConnectionStatus);
 
