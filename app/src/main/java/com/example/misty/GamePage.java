@@ -15,6 +15,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.example.misty.GameTimer;
+
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -58,6 +60,12 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
 
     private int specifiedRow = -1;
     private int specifiedCol = -1;
+
+
+    private boolean hasTimerStarted = false;
+    private boolean timerExpired = false;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -162,6 +170,10 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
             String[] parts = message.split(";");
             Log.d("GamePage", "messageReceived: parts length: " + parts.length);
 
+            if (timerExpired) {
+                Log.d("GamePage", "Timer has expired" + timerExpired);
+            }
+
             if (parts.length == 2) {
                 String type = parts[0].trim();
                 if (type.equals("Mistychoice")) {
@@ -227,7 +239,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
 
         //we check that v was not equal to a, since a is returned if the button has already been clicked.
         if (mv != 'a') {
-            sendMOutcomeOverTCP(mv); // Send the value over TCP
+            sendMOutcomeOverTCP(mv);  //  send if timer expired
         }
 
     }
@@ -333,11 +345,29 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
     //row is displayed in letters and column are numbers
     private void buttonClick(int row, int column) {
         if (!mistyTurnOver) return;
+        if (timerExpired) {
+            Log.d("GamePage", "buttonClick: Main timer already expired. No action.");
+            Toast.makeText(GamePage.this, "Game Over: Time's up!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (!hasTimerStarted) {
+
+            hasTimerStarted = true;
+
+            GameTimer.getInstance().startTimer(() -> {
+                runOnUiThread(() -> Toast.makeText(GamePage.this, "Time's up", Toast.LENGTH_SHORT).show());
+                timerExpired = true;
+            });
+
+
+
+        }
         char v = flipButton(row, column, true);
         mistyTurnOver = false; // Misty's turn now
         //we check that v was not equal to a, since a is returned if the button has already been clicked.
         if (v != 'a') {
             sendCOutcomeOverTCP(v); // Send the value over TCP
+
         }
 
     }

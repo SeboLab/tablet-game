@@ -22,7 +22,7 @@ public class TCPClient {
 
     private String serverMessage;
     // Constants for default server IP and port
-    public static final String SERVERIP = "192.168.1.148";
+    public static final String SERVERIP = "10.150.30.248";
     public static final int SERVERPORT = 8080;
 
     private String ipAddress;

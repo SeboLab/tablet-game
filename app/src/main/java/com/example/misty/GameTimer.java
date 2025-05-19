@@ -1,11 +1,16 @@
 package com.example.misty;
 
 import android.os.CountDownTimer;
+import android.util.Log;
+
+import com.example.misty.Socketconnection.TCPClient;
 
 public class GameTimer {
     private static GameTimer instance;
     private CountDownTimer timer;
-    private long remainingTime = 6000; // 5 minutes in milliseconds
+    //private long remainingTime = 6000; // 5 minutes in milliseconds
+
+    private long remainingTime = 500;
     private boolean isRunning = false;
     private GameTimerListener listener;
 
@@ -28,7 +33,7 @@ public class GameTimer {
         this.listener = listener;
         isRunning = true;
 
-        timer = new CountDownTimer(remainingTime, 1000) {
+        timer = new CountDownTimer(remainingTime, 500) {
             @Override
             public void onTick(long millisUntilFinished) {
                 remainingTime = millisUntilFinished;
@@ -40,6 +45,20 @@ public class GameTimer {
                 if (listener != null) {
                     listener.onTimerFinish();
                 }
+                new Thread(() -> {
+                    TCPClient client = TCPClient.getInstance();
+                    if (!client.isConnected()) {
+                        client.run();
+                    }
+                    if (client.isConnected()) {
+                        client.sendMessage("TIMER_FINISHED");
+                        Log.d("GameTimer", "Sent TIMER_FINISHED over TCP");
+
+                    } else {
+                        Log.e("GameTimer", "TCPClient not connected. Could not send TIMER_FINISHED");
+                    }
+
+                }).start();
             }
         };
         timer.start();
@@ -49,7 +68,7 @@ public class GameTimer {
         if (timer != null) {
             timer.cancel();
         }
-        remainingTime = 6000;
+        remainingTime = 500;
         isRunning = false;
     }
 
