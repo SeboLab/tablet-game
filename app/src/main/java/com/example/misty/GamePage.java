@@ -347,8 +347,8 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
         if (!mistyTurnOver) return;
         if (timerExpired) {
             Log.d("GamePage", "buttonClick: Main timer already expired. No action.");
-            Toast.makeText(GamePage.this, "Game Over: Time's up!", Toast.LENGTH_SHORT).show();
-            return;
+            Toast.makeText(GamePage.this, "Time's UP!", Toast.LENGTH_SHORT).show();
+            //return;
         }
         if (!hasTimerStarted) {
 

@@ -8,9 +8,9 @@ import com.example.misty.Socketconnection.TCPClient;
 public class GameTimer {
     private static GameTimer instance;
     private CountDownTimer timer;
-    //private long remainingTime = 6000; // 5 minutes in milliseconds
 
-    private long remainingTime = 500;
+
+    private long remainingTime = 300000; //5 minutes in milliseconds
     private boolean isRunning = false;
     private GameTimerListener listener;
 
@@ -33,7 +33,7 @@ public class GameTimer {
         this.listener = listener;
         isRunning = true;
 
-        timer = new CountDownTimer(remainingTime, 500) {
+        timer = new CountDownTimer(remainingTime, 300000) {
             @Override
             public void onTick(long millisUntilFinished) {
                 remainingTime = millisUntilFinished;
@@ -68,7 +68,7 @@ public class GameTimer {
         if (timer != null) {
             timer.cancel();
         }
-        remainingTime = 500;
+        remainingTime = 300000;
         isRunning = false;
     }
 
