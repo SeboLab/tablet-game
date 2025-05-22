@@ -10,7 +10,7 @@ public class GameTimer {
     private CountDownTimer timer;
 
 
-    private long remainingTime = 300000; //5 minutes in milliseconds
+    private long remainingTime = 60000; //5 minutes in milliseconds
     private boolean isRunning = false;
     private GameTimerListener listener;
 
@@ -33,7 +33,7 @@ public class GameTimer {
         this.listener = listener;
         isRunning = true;
 
-        timer = new CountDownTimer(remainingTime, 300000) {
+        timer = new CountDownTimer(remainingTime, 60000) {
             @Override
             public void onTick(long millisUntilFinished) {
                 remainingTime = millisUntilFinished;
@@ -51,7 +51,7 @@ public class GameTimer {
                         client.run();
                     }
                     if (client.isConnected()) {
-                        client.sendMessage("TIMER_FINISHED");
+                        client.sendMessage("Timer;" + "timer finished");
                         Log.d("GameTimer", "Sent TIMER_FINISHED over TCP");
 
                     } else {
@@ -68,7 +68,7 @@ public class GameTimer {
         if (timer != null) {
             timer.cancel();
         }
-        remainingTime = 300000;
+        remainingTime = 60000;
         isRunning = false;
     }
 
