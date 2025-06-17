@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -56,6 +57,8 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
 
     private TCPClient mTcpClient = TCPClient.getInstance();
 
+    private Handler delayHandler;
+
     private boolean mistyTurnOver = true;
 
     private int specifiedRow = -1;
@@ -73,6 +76,10 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
 
         Log.d("GamePage", "onCreate called - mTcpClient instance: " + mTcpClient.toString());
         mTcpClient.addMessageListener(this);
+
+        if (delayHandler == null) { // Check if it's already initialized
+            delayHandler = new Handler(Looper.getMainLooper());
+        }
         setContentView(R.layout.game_board);
 
         TextView textViewMode = findViewById(R.id.textViewMode);
@@ -158,12 +165,6 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mTcpClient.removeMessageListener(this);
-    }
-
-    @Override
     public void messageReceived(String message) {
         runOnUiThread(() -> {
             Log.d("GamePage", "message received: " + message);
@@ -239,7 +240,8 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
 
         //we check that v was not equal to a, since a is returned if the button has already been clicked.
         if (mv != 'a') {
-            sendMOutcomeOverTCP(mv);  //  send if timer expired
+            long delayMillis = 2000; // 2 seconds
+            sendMOutcomeOverTCP(mv);
         }
 
     }
@@ -267,11 +269,20 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
         //  int finalRandCol = randCol;
         //we check that v was not equal to a, since a is returned if the button has already been clicked.
         if (mv != 'a') {
-            sendMOutcomeOverTCP(mv); // Send the value over TCP
+            long delayMillis = 2000; // 2 seconds
+            sendMOutcomeOverTCP(mv);
         }
 
     }
-
+    private void sendMOutcomeOverTCPWithDelay(final char mv, long delayMillis) {
+        delayHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                // This code will run after the specified delay
+                sendMOutcomeOverTCP(mv);
+            }
+        }, delayMillis);
+    }
     private void sendMOutcomeOverTCP(char mv) {
         // Prepare the message string
         String message = "Moutcome;" + mv + ";";
@@ -347,7 +358,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
         if (!mistyTurnOver) return;
         if (timerExpired) {
             Log.d("GamePage", "buttonClick: Main timer already expired. No action.");
-            Toast.makeText(GamePage.this, "Time's UP!", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(GamePage.this, "Time's UP!", Toast.LENGTH_SHORT).show();
             //return;
         }
         if (!hasTimerStarted) {
@@ -355,7 +366,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
             hasTimerStarted = true;
 
             GameTimer.getInstance().startTimer(() -> {
-                runOnUiThread(() -> Toast.makeText(GamePage.this, "Time's up", Toast.LENGTH_SHORT).show());
+                //runOnUiThread(() -> Toast.makeText(GamePage.this, "Time's up", Toast.LENGTH_SHORT).show());
                 timerExpired = true;
             });
 
@@ -380,9 +391,16 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
             sendMessageToPython(messageToSend);
             Log.i("GamePage", "message being sent: " + messageToSend);
 
-            String MmessageToSend = "Mistyturn;" + "started";
-            sendMessageToPython(MmessageToSend);
-            Log.i("GamePage", "message being sent: " + MmessageToSend);
+            final String mistyTurnMessage = "Mistyturn;" + "started";
+            long delayMillis = 4000; // 4 seconds
+
+            delayHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    sendMessageToPython(mistyTurnMessage);
+                    Log.i("GamePage", "message being sent: " + mistyTurnMessage);
+                }
+            }, delayMillis);
         }
     }
 
@@ -530,5 +548,14 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
         }
 
     }
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mTcpClient.removeMessageListener(this);
+        // It's good practice to remove any pending callbacks from the handler
+        // when the activity is destroyed to prevent memory leaks or unwanted execution.
+        if (delayHandler != null) {
+            delayHandler.removeCallbacksAndMessages(null);
+        }
+    }
 }

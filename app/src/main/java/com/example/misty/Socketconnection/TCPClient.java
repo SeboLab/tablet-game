@@ -1,6 +1,8 @@
 package com.example.misty.Socketconnection;
 
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import com.example.misty.HomeActivity;
@@ -22,7 +24,7 @@ public class TCPClient {
 
     private String serverMessage;
     // Constants for default server IP and port
-    public static final String SERVERIP = "192.168.1.128";
+    public static final String SERVERIP = "192.168.0.190";
     public static final int SERVERPORT = 8080;
 
     private String ipAddress;
@@ -35,6 +37,7 @@ public class TCPClient {
 
     private boolean isConnected = false;
     public static TCPClient singleton = null; // Singleton instance
+
     private TCPClient() {
         // Private constructor to enforce singleton pattern
         // Initialize with default values

@@ -82,10 +82,10 @@
     <Button
         android:id="@+id/nextPageButton"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Next Page"
-        android:textSize="20sp"
-        android:padding="16dp"
+        android:layout_height="79dp"
         android:backgroundTint="#6A0DAD"
-        android:textColor="@android:color/white"/>
+        android:padding="16dp"
+        android:text="Start Game"
+        android:textColor="@android:color/white"
+        android:textSize="20sp" />
 </LinearLayout>
