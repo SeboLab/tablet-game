@@ -89,12 +89,11 @@ public class AvatarSelectionActivity extends AppCompatActivity implements  TCPCl
             }
         });
         // disable the next page button by doing false
-        nextPageButton.setClickable(true);
-        nextPageButton.setEnabled(true);
+        nextPageButton.setEnabled(false);
         // Set up a delay to allow sending before going to the next page.
         new Handler().postDelayed(() -> {
-            nextPageButton.setClickable(true);
-        }, 5000);
+            nextPageButton.setEnabled(true);
+        }, 15000);
 
 
         //redAvatarButton.setOnClickListener(v -> startGame("Red"));
