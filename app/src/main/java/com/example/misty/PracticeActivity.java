@@ -185,14 +185,14 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
 
         for (int i = 0; i < ROWS; i++) {
             TextView rowLeft = new TextView(this);
-            rowLeft.setText(String.valueOf((char) ('A' + i)));
+            rowLeft.setText(String.valueOf((char) ('X' + i)));
             rowLeft.setTextColor(getResources().getColor(android.R.color.white));
             rowLeft.setTextSize(25);
             rowLeft.setPadding(50, rowPadding, 10, rowPadding);
             leftRowNumbers.addView(rowLeft);
 
             TextView rowRight = new TextView(this);
-            rowRight.setText(String.valueOf((char) ('A' + i)));
+            rowRight.setText(String.valueOf((char) ('X' + i)));
             rowRight.setTextColor(getResources().getColor(android.R.color.white));
             rowRight.setTextSize(25);
             rowRight.setPadding(50, rowPadding, 10, rowPadding);
@@ -312,7 +312,14 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
                             char rowChar = coordinates.charAt(0);
                             String colStr = coordinates.substring(1);
 
-                            specifiedRow = rowChar - 'A';
+                            if(rowChar == 'X'){
+                                specifiedRow = 0;
+                            }else if(rowChar == 'Y'){
+                                specifiedRow = 1;
+                            }else if(rowChar == 'Z'){
+                                specifiedRow = 2;
+                            }
+
                             specifiedCol = Integer.parseInt(colStr) - 1;
 
                             Log.d("PracticeActivity", "Parsed to row: " + specifiedRow + ", col: " + specifiedCol);
