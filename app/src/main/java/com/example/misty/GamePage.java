@@ -185,7 +185,13 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
                             char rowChar = coordinates.charAt(0);
                             String colStr = coordinates.substring(1);
 
-                            specifiedRow = rowChar - 'A';
+                            if(rowChar == 'X'){
+                                specifiedRow = 0;
+                            }else if(rowChar == 'Y'){
+                                specifiedRow = 1;
+                            }else if(rowChar == 'Z'){
+                                specifiedRow = 2;
+                            }
                             specifiedCol = Integer.parseInt(colStr) - 1;
 
                             Log.d("GamePage", "Parsed to row: " + specifiedRow + ", col: " + specifiedCol);

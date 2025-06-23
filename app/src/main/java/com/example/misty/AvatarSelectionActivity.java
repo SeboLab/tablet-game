@@ -93,7 +93,7 @@ public class AvatarSelectionActivity extends AppCompatActivity implements  TCPCl
         // Set up a delay to allow sending before going to the next page.
         new Handler().postDelayed(() -> {
             nextPageButton.setEnabled(true);
-        }, 15000);
+        }, 10000);
 
 
         //redAvatarButton.setOnClickListener(v -> startGame("Red"));
