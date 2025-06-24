@@ -62,7 +62,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.d("GamePage", "onCreate called - mTcpClient instance: " + mTcpClient.toString());
+        Log.d("PracticePage", "onCreate called - mTcpClient instance: " + mTcpClient.toString());
         mTcpClient.addMessageListener(this);
 
         if (delayHandler == null) { // Check if it's already initialized
@@ -231,18 +231,18 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
     }
 
     private void buttonClick(int row, int column) {
-        Log.d("GamePage", "button click called misty turnover "+mistyTurnOver + ", mistyspeaking: " + mistySpeaking );
+        Log.d("PracticeActivity", "button click called misty turnover "+mistyTurnOver + ", mistyspeaking: " + mistySpeaking );
 
         if (!mistyTurnOver || mistySpeaking) {
-            Log.d("GamePage", "Blocked: Misty is playing or speaking.");
+            Log.d("PracticeActivity", "Blocked: Misty is playing or speaking.");
             Toast.makeText(this, "Wait for Misty to finish!", Toast.LENGTH_SHORT).show();
             return;
         }
         if (leftRevealed[row][column]) {
-            Log.d("Gamepage", "Tile already revealed at row " + row + "col," + column);
+            Log.d("PracticeActivity", "Tile already revealed at row " + row + "col," + column);
             return;
         }
-        Log.d("GamePage", "Player making move at row" + row + "col " + column);
+        Log.d("PracticeActivity", "Player making move at row" + row + "col " + column);
 
         char v = flipButton(row, column, true); //player's turn
         //we check that v was not equal to a, since a is returned if the button has already been clicked.
@@ -253,7 +253,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
             disableUserBoard();
 
             sendCOutcomeOverTCP(v); // Send the value over TCP
-            Log.d("GamePage", "userboard disabled after player's move.");
+            Log.d("PracticeActivity", "userboard disabled after player's move.");
         }
     }
 
@@ -303,14 +303,14 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
     }
 
     public void mistyTurn() {
-        Log.d("GamePage", "mistyTurn() called mistySpeaking: " + mistySpeaking + "mistyTurnOver:" + mistyTurnOver);
-        // Log.e("GamePage", "mistyTurn: Called");
+        Log.d("PracticeActivity", "mistyTurn() called mistySpeaking: " + mistySpeaking + "mistyTurnOver:" + mistyTurnOver);
+        // Log.e("PracticeActivity", "mistyTurn: Called");
         if(mistySpeaking){
-            Log.d("GamePage", "mistyTurn() blocked because misty is speaking");
+            Log.d("PracticeActivity", "mistyTurn() blocked because misty is speaking");
             return;
         }
         if (specifiedRow != -1 && specifiedCol != -1) {
-            Log.d("GamePage", "Misty started playing: row" + specifiedRow + ", col " + specifiedCol);
+            Log.d("PracticeActivity", "Misty started playing: row" + specifiedRow + ", col " + specifiedCol);
             // Use the specified row and column
             mistyTurnOver = false;
             mistySpeaking = false;
@@ -323,7 +323,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
             mistyTurnOver = true;
 
         } else {
-            Log.d("Gamepage", "mistyTurn() called but no valid coordinates specified");
+            Log.d("PracticeActivity", "mistyTurn() called but no valid coordinates specified");
         }
     }
 
@@ -331,7 +331,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
         System.out.println("Misty is playing by specified move...");
 
         if (row < 0 || row >= ROWS || col < 0 || col >= COLUMNS) {
-            Log.e("Gamepage", "invalud coordinates: row" + row + ", col= " + col);
+            Log.e("PracticeActivity", "invalud coordinates: row" + row + ", col= " + col);
 
             mistySpeaking = false;
             mistyTurnOver = true;
@@ -339,14 +339,14 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
             return;
         }
         if (rightRevealed[row][col]) {
-            Log.d("Gamepage", "Tile already revealed at row" + row + ", col= " + col);
+            Log.d("PracticeActivity", "Tile already revealed at row" + row + ", col= " + col);
             mistySpeaking = false;
             mistyTurnOver = false;
             enableUserBoard();
             return;
         }
 
-        Log.d("GamePage", " Misty flipping tile at row" + row + ",col " + col);
+        Log.d("PracticeActivity", " Misty flipping tile at row" + row + ",col " + col);
 
         char mv = flipButton(row, col, false); // Misty plays on right board
 
@@ -359,15 +359,15 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
 
             if (delayHandler != null) {
                 delayHandler.postDelayed(() -> {
-                    Log.d("GamePage", "misty finished turn delay");
+                    Log.d("PracticeActivity", "misty finished turn delay");
                     mistySpeaking = false;
                     mistyTurnOver = true;
                     enableUserBoard();
-                    Log.d("GamePage", "Misty finished speaking. Player turn resumed.");
+                    Log.d("PracticeActivity", "Misty finished speaking. Player turn resumed.");
                 }, 10000);
             }
         } else {
-            Log.e("GamePage", "flipButton returned a tile may already be revealed");
+            Log.e("PracticeActivity", "flipButton returned a tile may already be revealed");
             //if move invalid reset mity's turn state
             mistySpeaking = false;
             mistyTurnOver = true;
@@ -476,7 +476,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
                 @Override
                 public void run() {
                     sendMessageToPython(mistyTurnMessage);
-                    Log.i("GamePage", "message being sent: " + mistyTurnMessage);
+                    Log.i("PracticeActivity", "message being sent: " + mistyTurnMessage);
                 }
             }, delayMillis);
         }
@@ -515,7 +515,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
     //disables each button so player cannot click any tiles
     //used right after player makes a move during misty's turn
     private void disableUserBoard() {
-        Log.d("GamePage", "disabling user board");
+        Log.d("PracticeActivity", "disabling user board");
         runOnUiThread(() -> {
             for (int row = 0; row < ROWS; row++) {
                 for (int col = 0; col < COLUMNS; col++) {
@@ -529,7 +529,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
     //makes sure players can click only hidden tiles
     //used after misty finishes her turn and speaking to give control back to player
     private void enableUserBoard() {
-        Log.d("GamePage", "enabling user board");
+        Log.d("PracticeActivity", "enabling user board");
         runOnUiThread(() -> {
             if (mistyTurnOver && !mistySpeaking) {
                 for (int row = 0; row < ROWS; row++) {
@@ -539,9 +539,9 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
                         }
                     }
                 }
-                Log.d("GamePage", "userboard enabled player can move");
+                Log.d("PracticeActivity", "userboard enabled player can move");
             } else {
-                Log.d("GamePage", "Userboard not enabled misty turn over" + mistyTurnOver + " mistySpeaking " + mistySpeaking);
+                Log.d("PracticeActivity", "Userboard not enabled misty turn over" + mistyTurnOver + " mistySpeaking " + mistySpeaking);
             }
         });
     }
