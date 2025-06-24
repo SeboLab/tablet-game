@@ -96,6 +96,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
 
         Button backHomeButton = findViewById(R.id.backHomeButton);
         backHomeButton.setOnClickListener(v -> {
+            sendHomeButtonClick();
             Intent intent = new Intent(PracticeActivity.this, HomeActivity.class);
             startActivity(intent);
             finish();
@@ -381,6 +382,19 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
                 Log.d("PracticeActivity", "Sending: " + msg);
                 TCPClient.singleton.sendMessage(msg);
             }).start();
+        }
+    }
+
+    private void sendHomeButtonClick() {
+        String message = "true";
+        if (mTcpClient != null && mTcpClient.isConnected()) { // Check if TCPClient is initialized and connected
+            Log.d("PracticeActivity", "Homebutton:" + message);
+            mTcpClient.sendMessage(message); // Assuming your TCPClient has a sendMessage method
+            Log.d("PracticeActivity", "Homebutton:" + message);
+        } else {
+            Log.e("PracticeActivity", "Homebutton: TCPClient not connected or not initialized. Cannot send message.");
+            // Optionally, you could show a Toast to the user here
+            // Toast.makeText(this, "Error: Could not send command. Check connection.", Toast.LENGTH_SHORT).show();
         }
     }
 
