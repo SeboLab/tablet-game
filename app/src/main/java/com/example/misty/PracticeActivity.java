@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -45,8 +46,9 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
 
 
     private TCPClient mTcpClient = TCPClient.getInstance();
-
+    private Handler delayHandler;
     private boolean mistyTurnOver = true;
+    private boolean mistySpeaking = false;
 
     private int specifiedRow = -1;
     private int specifiedCol = -1;
@@ -59,10 +61,22 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_practice);
 
         Log.d("GamePage", "onCreate called - mTcpClient instance: " + mTcpClient.toString());
         mTcpClient.addMessageListener(this);
+
+        if (delayHandler == null) { // Check if it's already initialized
+            delayHandler = new Handler(Looper.getMainLooper());
+        }
+        setContentView(R.layout.game_board);
+
+        leftGoldCountText = findViewById(R.id.leftGoldCountText);
+        rightGoldCountText = findViewById(R.id.rightGoldCountText);
+
+        leftRowNumbers = findViewById(R.id.leftRowNumbers);
+        leftColumnNumbers = findViewById(R.id.leftColumnNumbers);
+        rightRowNumbers = findViewById(R.id.rightRowNumbers);
+        rightColumnNumbers = findViewById(R.id.rightColumnNumbers);
 
         GridLayout leftGridLayout = findViewById(R.id.leftBoard);
         GridLayout rightGridLayout = findViewById(R.id.rightBoard);
@@ -78,11 +92,6 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
         initializeBoard(leftGridLayout, leftButtons, leftNumbers, leftRevealed, true);
         initializeBoard(rightGridLayout, rightButtons, rightNumbers, rightRevealed, false);
 
-        leftRowNumbers = findViewById(R.id.leftRowNumberss);
-        leftColumnNumbers = findViewById(R.id.leftColumnNumberss);
-        rightRowNumbers = findViewById(R.id.rightRowNumberss);
-        rightColumnNumbers = findViewById(R.id.rightColumnNumberss);
-
         setupGridLabels();
 
         Button backHomeButton = findViewById(R.id.backHomeButton);
@@ -97,6 +106,11 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
     protected void onDestroy() {
         super.onDestroy();
         mTcpClient.removeMessageListener(this);
+        // It's good practice to remove any pending callbacks from the handler
+        // when the activity is destroyed to prevent memory leaks or unwanted execution.
+        if (delayHandler != null) {
+            delayHandler.removeCallbacksAndMessages(null);
+        }
     }
 
     private void generateShuffledNumbers(Board board, char[][] numbers, boolean[][] revealed) {
@@ -157,58 +171,90 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
     }
 
     private void setupGridLabels() {
+        // Clear existing row and column labels to avoid duplication
         leftRowNumbers.removeAllViews();
         leftColumnNumbers.removeAllViews();
         rightRowNumbers.removeAllViews();
         rightColumnNumbers.removeAllViews();
 
-        int columnPadding = 80;
-        int rowPadding = 50;
-
-        for (int i = 0; i < COLUMNS; i++) {
-            TextView colLeft = new TextView(this);
-            colLeft.setText(String.valueOf(i + 1));
-            colLeft.setTextColor(getResources().getColor(android.R.color.white));
-            colLeft.setTextSize(22);
-            colLeft.setPadding(columnPadding, 10, columnPadding, 10);
-            colLeft.setGravity(Gravity.CENTER);
-            leftColumnNumbers.addView(colLeft);
-
-            TextView colRight = new TextView(this);
-            colRight.setText(String.valueOf(i + 1));
-            colRight.setTextColor(getResources().getColor(android.R.color.white));
-            colRight.setTextSize(22);
-            colRight.setPadding(columnPadding, 10, columnPadding, 10);
-            colRight.setGravity(Gravity.CENTER);
-            rightColumnNumbers.addView(colRight);
+        // Adjust padding dynamically based on difficulty
+        int columnPadding, rowPadding;
+        if (ROWS == 7) { // Hard mode (7x7)
+            columnPadding = 40; // Reduce column padding
+            rowPadding = 30;    // Reduce row padding
+        } else if (ROWS == 5) { // Medium mode (5x5)
+            columnPadding = 60;
+            rowPadding = 40;
+        } else { // Easy mode (3x3)
+            columnPadding = 80;
+            rowPadding = 50;
         }
 
-        for (int i = 0; i < ROWS; i++) {
-            TextView rowLeft = new TextView(this);
-            rowLeft.setText(String.valueOf((char) ('X' + i)));
-            rowLeft.setTextColor(getResources().getColor(android.R.color.white));
-            rowLeft.setTextSize(25);
-            rowLeft.setPadding(50, rowPadding, 10, rowPadding);
-            leftRowNumbers.addView(rowLeft);
+        // Add column numbers
+        for (int i = 0; i < COLUMNS; i++) {
+            TextView colLabelLeft = new TextView(this);
+            colLabelLeft.setText(String.valueOf(i + 1));
+            colLabelLeft.setGravity(Gravity.CENTER);
+            colLabelLeft.setTextColor(Color.WHITE);
+            colLabelLeft.setTextSize(22); // Reduce text size slightly
+            colLabelLeft.setPadding(columnPadding, 10, columnPadding, 10);
+            leftColumnNumbers.addView(colLabelLeft);
 
-            TextView rowRight = new TextView(this);
-            rowRight.setText(String.valueOf((char) ('X' + i)));
-            rowRight.setTextColor(getResources().getColor(android.R.color.white));
-            rowRight.setTextSize(25);
-            rowRight.setPadding(50, rowPadding, 10, rowPadding);
-            rightRowNumbers.addView(rowRight);
+            TextView colLabelRight = new TextView(this);
+            colLabelRight.setText(String.valueOf(i + 1));
+            colLabelRight.setTextSize(22f);
+            colLabelRight.setTextColor(Color.WHITE);
+            colLabelRight.setGravity(Gravity.CENTER);
+            colLabelRight.setPadding(columnPadding, 10, columnPadding, 10);
+            rightColumnNumbers.addView(colLabelRight);
+        }
+
+        // Add row numbers
+        for (int i = 0; i < ROWS; i++) {
+            TextView rowLabelLeft = new TextView(this);
+            rowLabelLeft.setText(String.valueOf((char) ('X' + i)));
+            rowLabelLeft.setTextSize(25f);
+            rowLabelLeft.setTextColor(Color.WHITE);
+
+            // Adjust padding dynamically
+            rowPadding = (ROWS == 3) ? 50 : (ROWS == 5) ? 40 : 20;
+            rowLabelLeft.setPadding(50, rowPadding, 10, rowPadding);
+            leftRowNumbers.addView(rowLabelLeft);
+
+            TextView rowLabelRight = new TextView(this);
+            rowLabelRight.setText(String.valueOf((char) ('X' + i)));
+            rowLabelRight.setTextSize(25f);
+            rowLabelRight.setTextColor(Color.WHITE);
+            rowLabelRight.setPadding(50, rowPadding, 10, rowPadding);
+            rightRowNumbers.addView(rowLabelRight);
         }
     }
 
     private void buttonClick(int row, int column) {
-        if (!mistyTurnOver) return;
-        char v = flipButton(row, column, true);
-        mistyTurnOver = false; // Misty's turn now
+        Log.d("GamePage", "button click called misty turnover "+mistyTurnOver + ", mistyspeaking: " + mistySpeaking );
+
+        if (!mistyTurnOver || mistySpeaking) {
+            Log.d("GamePage", "Blocked: Misty is playing or speaking.");
+            Toast.makeText(this, "Wait for Misty to finish!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (leftRevealed[row][column]) {
+            Log.d("Gamepage", "Tile already revealed at row " + row + "col," + column);
+            return;
+        }
+        Log.d("GamePage", "Player making move at row" + row + "col " + column);
+
+        char v = flipButton(row, column, true); //player's turn
         //we check that v was not equal to a, since a is returned if the button has already been clicked.
         if (v != 'a') {
-            sendCOutcomeOverTCP(v); // Send the value over TCP
-        }
+            //set misty turn state
+            mistyTurnOver = false; // Misty's turn now
+            mistySpeaking = false;
+            disableUserBoard();
 
+            sendCOutcomeOverTCP(v); // Send the value over TCP
+            Log.d("GamePage", "userboard disabled after player's move.");
+        }
     }
 
     private char flipButton(int row, int col, boolean isLeftBoard) {
@@ -221,62 +267,112 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
             revealed[row][col] = true;
 
 
-            if (numbers[row][col] == 'G') {
-                if (isLeftBoard) {
-                    leftGoldCount++;
-                    if (leftGoldCountText != null) {
-                        leftGoldCountText.setText(" " + leftGoldCount);
-                    }
+            runOnUiThread(() -> {
+                if (numbers[row][col] == 'G') {
+                    if (isLeftBoard) {
+                        leftGoldCount++;
+                        if (leftGoldCountText != null) {
+                            leftGoldCountText.setText(" " + leftGoldCount);
+                        }
 
+                    } else {
+                        rightGoldCount++;
+                        if (rightGoldCountText != null) {
+                            rightGoldCountText.setText(" " + rightGoldCount);
+                        }
+
+                    }
+                    buttons[row][col].setBackgroundResource(R.drawable.gold); // this will show gold image
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> resetBoard(isLeftBoard), 5000);
+                    // mistyTurnOver = true;
+                } else if (numbers[row][col] == 'B') {
+                    buttons[row][col].setBackgroundResource(R.drawable.bomb); // this will show bomb image
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> resetBoard(isLeftBoard), 5000);
+                    //mistyTurnOver = true;
                 } else {
-                    rightGoldCount++;
-                    if (rightGoldCountText != null) {
-                        rightGoldCountText.setText(" " + rightGoldCount);
-                    }
-
+                    buttons[row][col].setText(String.valueOf(numbers[row][col])); // this will show the number of squares away from the bomb
+                    buttons[row][col].setTextColor(Color.BLACK);
+                    buttons[row][col].setBackgroundColor(Color.LTGRAY);
+                    //mistyTurnOver = true;
                 }
-                buttons[row][col].setBackgroundResource(R.drawable.gold); // this will show gold image
-                new Handler().postDelayed(() -> resetBoard(isLeftBoard), 5000);
-                mistyTurnOver = true;
-            } else if (numbers[row][col] == 'B') {
-                buttons[row][col].setBackgroundResource(R.drawable.bomb); // this will show bomb image
-                new Handler().postDelayed(() -> resetBoard(isLeftBoard), 5000);
-                mistyTurnOver = true;
-            } else {
-                buttons[row][col].setText(String.valueOf(numbers[row][col])); // this will show the number of squares away from the bomb
-                buttons[row][col].setTextColor(Color.BLACK);
-                buttons[row][col].setBackgroundColor(Color.LTGRAY);
-                mistyTurnOver = true;
-            }
+            });
+
             return numbers[row][col];
         }
         return 'a';
     }
 
     public void mistyTurn() {
+        Log.d("GamePage", "mistyTurn() called mistySpeaking: " + mistySpeaking + "mistyTurnOver:" + mistyTurnOver);
         // Log.e("GamePage", "mistyTurn: Called");
+        if(mistySpeaking){
+            Log.d("GamePage", "mistyTurn() blocked because misty is speaking");
+            return;
+        }
         if (specifiedRow != -1 && specifiedCol != -1) {
+            Log.d("GamePage", "Misty started playing: row" + specifiedRow + ", col " + specifiedCol);
             // Use the specified row and column
+            mistyTurnOver = false;
+            mistySpeaking = false;
+            disableUserBoard();
             flipSpecifiedSquare(specifiedRow, specifiedCol);
+
             // Reset the specified row and column
             specifiedRow = -1;
             specifiedCol = -1;
             mistyTurnOver = true;
 
         } else {
-            mistyTurnOver = false;
+            Log.d("Gamepage", "mistyTurn() called but no valid coordinates specified");
         }
     }
 
     private void flipSpecifiedSquare(int row, int col) {
         System.out.println("Misty is playing by specified move...");
+
+        if (row < 0 || row >= ROWS || col < 0 || col >= COLUMNS) {
+            Log.e("Gamepage", "invalud coordinates: row" + row + ", col= " + col);
+
+            mistySpeaking = false;
+            mistyTurnOver = true;
+            enableUserBoard();
+            return;
+        }
+        if (rightRevealed[row][col]) {
+            Log.d("Gamepage", "Tile already revealed at row" + row + ", col= " + col);
+            mistySpeaking = false;
+            mistyTurnOver = false;
+            enableUserBoard();
+            return;
+        }
+
+        Log.d("GamePage", " Misty flipping tile at row" + row + ",col " + col);
+
         char mv = flipButton(row, col, false); // Misty plays on right board
 
         //we check that v was not equal to a, since a is returned if the button has already been clicked.
         if (mv != 'a') {
-            sendMOutcomeOverTCP(mv); // Send the value over TCP
-        }
+            mistySpeaking = true;
+            mistyTurnOver = false;
 
+            sendMOutcomeOverTCP(mv); // sends result to python
+
+            if (delayHandler != null) {
+                delayHandler.postDelayed(() -> {
+                    Log.d("GamePage", "misty finished turn delay");
+                    mistySpeaking = false;
+                    mistyTurnOver = true;
+                    enableUserBoard();
+                    Log.d("GamePage", "Misty finished speaking. Player turn resumed.");
+                }, 10000);
+            }
+        } else {
+            Log.e("GamePage", "flipButton returned a tile may already be revealed");
+            //if move invalid reset mity's turn state
+            mistySpeaking = false;
+            mistyTurnOver = true;
+            enableUserBoard();
+        }
     }
 
     private void sendPracticeMessage(String msg) {
@@ -301,8 +397,9 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
             String[] parts = message.split(";");
             Log.d("PracticeActivity", "messageReceived: parts length: " + parts.length);
 
-            if (parts.length == 2) {
+            if (parts.length >= 2) {
                 String type = parts[0].trim();
+                Log.d("PracticeActivity", "Message type: " + type);
                 if (type.equals("Mistychoice")) {
                     String coordinates = parts[1].trim();
                     Log.d("PracticeActivity", "messageReceived: coordinates: " + coordinates);
@@ -323,6 +420,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
                             specifiedCol = Integer.parseInt(colStr) - 1;
 
                             Log.d("PracticeActivity", "Parsed to row: " + specifiedRow + ", col: " + specifiedCol);
+
                             mistyTurn();
                         } catch (NumberFormatException | IndexOutOfBoundsException e) {
                             Log.e("PracticeActivity", "Error parsing coordinate: " + coordinates, e);
@@ -371,12 +469,18 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
             sendMessageToPython(messageToSend);
             Log.i("PracticePage", "message being sent: " + messageToSend);
 
-            String MmessageToSend = "Mistyturn;" + "started";
-            sendMessageToPython(MmessageToSend);
-            Log.i("PracticePage", "message being sent: " + MmessageToSend);
+            final String mistyTurnMessage = "Mistyturn;" + "started";
+            long delayMillis = 4000; // 4 seconds
+
+            delayHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    sendMessageToPython(mistyTurnMessage);
+                    Log.i("GamePage", "message being sent: " + mistyTurnMessage);
+                }
+            }, delayMillis);
         }
     }
-
     private void resetBoard(boolean isLeftBoard) {
         if (isLeftBoard) {
             leftGame = new Board(ROWS, COLUMNS);
@@ -389,8 +493,11 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
                     leftRevealed[row][col] = false;
                 }
             }
-
-
+            //only enable board if player's turn and misty isn't speaking
+            if (mistyTurnOver && !mistySpeaking) {
+                enableUserBoard();
+            }
+            //if misty active board stays disabled until her turn ends
         } else {
             rightGame = new Board(ROWS, COLUMNS);
             generateShuffledNumbers(rightGame, rightNumbers, rightRevealed);
@@ -403,7 +510,39 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
                 }
             }
         }
-
     }
-
+    //loop through all buttons on left board
+    //disables each button so player cannot click any tiles
+    //used right after player makes a move during misty's turn
+    private void disableUserBoard() {
+        Log.d("GamePage", "disabling user board");
+        runOnUiThread(() -> {
+            for (int row = 0; row < ROWS; row++) {
+                for (int col = 0; col < COLUMNS; col++) {
+                    leftButtons[row][col].setEnabled(false);
+                }
+            }
+        });
+    }
+    //loops through all buttons on left board
+    //enables only unrevealed tiles
+    //makes sure players can click only hidden tiles
+    //used after misty finishes her turn and speaking to give control back to player
+    private void enableUserBoard() {
+        Log.d("GamePage", "enabling user board");
+        runOnUiThread(() -> {
+            if (mistyTurnOver && !mistySpeaking) {
+                for (int row = 0; row < ROWS; row++) {
+                    for (int col = 0; col < COLUMNS; col++) {
+                        if (!leftRevealed[row][col]) {
+                            leftButtons[row][col].setEnabled(true);
+                        }
+                    }
+                }
+                Log.d("GamePage", "userboard enabled player can move");
+            } else {
+                Log.d("GamePage", "Userboard not enabled misty turn over" + mistyTurnOver + " mistySpeaking " + mistySpeaking);
+            }
+        });
+    }
 }

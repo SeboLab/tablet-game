@@ -18,7 +18,7 @@
 
 
         <!-- HomeActivity (Launcher Page) -->
-        <activity android:name=".HomeActivity"
+        <activity android:name=".PracticeActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -26,8 +26,8 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".GamePage" android:exported="true"/>
-        <activity android:name=".PracticeActivity"/>
+        <activity android:name=".HomeActivity" android:exported="false"/>
+        <activity android:name=".GamePage" android:exported = "true"/>
         <activity android:name=".AvatarSelectionActivity" />
 
 
