@@ -75,7 +75,6 @@
         android:textSize="14sp"
         android:layout_marginBottom="24dp" />
 
-
     <Button
         android:id="@+id/ConnectButton"
         android:layout_width="wrap_content"

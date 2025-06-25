@@ -83,7 +83,6 @@ public class HomeActivity extends Activity implements View.OnClickListener, TCPC
             Intent intent = new Intent(HomeActivity.this, AvatarSelectionActivity.class);
             intent.putExtra("difficulty", selectedDifficulty);
             startActivity(intent);
-            finish();
         });
         Button practiceButton = findViewById(R.id.practiceButton);
         practiceButton.setOnClickListener(v->{
@@ -94,7 +93,7 @@ public class HomeActivity extends Activity implements View.OnClickListener, TCPC
 
         // setting up the ip port address and connect button
         iPandPort = findViewById(R.id.IPandPort);
-        iPandPort.setText("192.168.0.190:8080");
+        iPandPort.setText("192.168.0.144:8080");
         connectButton = findViewById(R.id.ConnectButton);
         //connectionStatus = findViewById(R.id.ConnectionStatus);
 

@@ -154,9 +154,15 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
 
         Button backHomeButton = findViewById(R.id.backHomeButton);
         backHomeButton.setOnClickListener(v -> {
-            Intent intent = new Intent(GamePage.this, HomeActivity.class);
-            startActivity(intent);
-            finish();
+            sendHomeButtonClick();
+            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    Intent intent = new Intent(GamePage.this, HomeActivity.class);
+                    startActivity(intent);
+                    finish();
+                }
+            }, 5000);
         });
 
     }
@@ -622,6 +628,11 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
             }
         }
 
+    }
+    private void sendHomeButtonClick() {
+        String messageToSend = "Homebutton; true";
+        Log.d("GamePage", "Sending: " + messageToSend);
+        sendMessageToPython(messageToSend);
     }
 
     @Override

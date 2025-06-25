@@ -85,7 +85,6 @@ public class AvatarSelectionActivity extends AppCompatActivity implements  TCPCl
                 intent.putExtra("avatar", selectedAvatar);
                 intent.putExtra("difficulty", selectedDifficulty);
                 startActivity(intent);
-                finish();
             }
         });
         // disable the next page button by doing false
