@@ -29,7 +29,6 @@ public class TCPClient {
 
     private String ipAddress;
     private int ipPortVar;
-    private boolean running = false;
     private PrintWriter bufferOut;
     private BufferedReader bufferIn;
     private Socket socket;
@@ -51,7 +50,6 @@ public class TCPClient {
     }
     //method to add listeners
     public void addMessageListener(OnMessageReceived listener) {
-
         messageListeners.add(listener);
     }
     //method to remove listeners
@@ -68,18 +66,66 @@ public class TCPClient {
     }
     public void setIpAddress(String ipAddress) {
         //check if its empty, if so, use the default one
-        if (ipAddress.isEmpty())
+        if (ipAddress == null || ipAddress.trim().isEmpty())
             this.ipAddress= SERVERIP;
         else
-            this.ipAddress = ipAddress;
+            this.ipAddress = ipAddress.trim();
     }
-
     public void setIpPortVar(int ipPortVar) {
         //check if its 0, if so, use default one
-        if(ipPortVar==0)
+        if(ipPortVar<=0)
             this.ipPortVar= SERVERPORT;
         else
             this.ipPortVar = ipPortVar;
+    }
+
+    public boolean setIpAndPort(String ipAndPort) {
+        if (ipAndPort == null || ipAndPort.trim().isEmpty()) {
+            this.ipAddress = SERVERIP;
+            this.ipPortVar = SERVERPORT;
+            return true;
+        }
+        try {
+            String[] parts = ipAndPort.trim().split(":");
+            if (parts.length == 2) {
+                String ip = parts[0].trim();
+                int port = Integer.parseInt(parts[1].trim());
+
+                if (isValidIP(ip) && port > 0 && port <= 65535) {
+                    this.ipAddress = ip;
+                    this.ipPortVar = port;
+                    return true;
+                }
+            }
+        } catch (NumberFormatException e) {
+            Log.e("TCPClient", "Invalid port number format" + e);
+        }
+        this.ipAddress = SERVERIP;
+        this.ipPortVar = SERVERPORT;
+        return false;
+    }
+
+    private boolean isValidIP(String ip){
+        if(ip == null || ip.isEmpty()) return false;
+        String[] parts = ip.split("\\.");
+        if(parts.length != 4) return false;
+        try{
+            for(String part:parts){
+                int num = Integer.parseInt(part);
+                if(num < 0 || num >255) return false;
+            }
+            return true;
+        }catch(NumberFormatException e){
+            return false;
+        }
+    }
+
+    public String getIpAddress(){
+        return ipAddress;
+    }
+
+    public int getIpPortVar(){
+        return ipPortVar;
     }
 
     public void sendMessage(String message) {
@@ -107,9 +153,9 @@ public class TCPClient {
         Log.d("TCPClient", "C: Attempting to connect with IP: " + ipAddress + " and Port:" + ipPortVar);
 
         try {
-            //here you must put your computer's IP address.
-            InetAddress serverAddr = InetAddress.getByName(ipAddress);
+            isConnected = false;
 
+            InetAddress serverAddr = InetAddress.getByName(ipAddress);
             socket = new Socket(serverAddr, ipPortVar);
             Log.d("TCPClient", "C: Connected.");
             isConnected = true;
@@ -120,17 +166,17 @@ public class TCPClient {
             bufferIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             Log.d("TCPClient", "bufferIn created");
             Log.e("TCPClient", "C: Session Started!");
-
         } catch (Exception e) {
             Log.e("TCPClient", "C: Error", e);
             Log.e("TCPClient", "C: Could not Connect.");
+            isConnected = false;
         }
     }
     public void startListening() {
         String serverMessage;
         try {
             //keep listening for message while there is not an error.
-            while (true) {
+            while ( isConnected && socket != null && !socket.isClosed()) {
                 Log.e("TCPClient", "C: Waiting for message...");
                 serverMessage = bufferIn.readLine();
                 if (serverMessage!=null){
@@ -139,23 +185,47 @@ public class TCPClient {
                         sendMessageToListeners(serverMessage);
                         Log.e("TCPClient", "C: Received Message - " + serverMessage);
                     }
+                }else{
+                    break;
                 }
             }
         } catch (Exception e) {
             Log.e("TCPClient", "C: Error Listening", e);
         } finally {
-            if (socket != null && !socket.isClosed()) {
-                try {
-                    //the socket must be closed. It is closed after each session
-                    socket.close();
-                } catch (IOException e) {
-                    Log.e("TCPClient", "C: Error closing socket", e);
-                }
-                Log.e("TCPClient", "C: Connection Closed.");
-            }
+            disconnect();
         }
     }
+    public void disconnect(){
+        isConnected = false;
+
+        try{
+            if(bufferOut != null){
+                bufferOut.close();
+                bufferOut = null;
+            }
+        }catch(Exception e){
+            Log.e("TCPClient", " error closing output stream" + e);
+        }
+
+        try{
+            if(bufferIn != null){
+                bufferIn.close();
+                bufferIn = null;
+            }
+        }catch(Exception e){
+            Log.e("TCPClient", " error closing input stream" + e);
+        }
+        try{
+            if(socket != null){
+                socket.close();
+                socket = null;
+            }
+        }catch(Exception e){
+            Log.e("TCPClient", " error closing socket stream" + e);
+        }
+        Log.e("TCPClient","C: Connection closed.");
+    }
     public boolean isConnected() {
-        return isConnected;
+        return isConnected && socket != null && !socket.isClosed();
     }
 }

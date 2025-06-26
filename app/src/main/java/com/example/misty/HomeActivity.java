@@ -1,5 +1,6 @@
 package com.example.misty;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -45,19 +46,7 @@ public class HomeActivity extends Activity implements View.OnClickListener, TCPC
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        //set the ip and port of the server
-        mTcpClient.setIpAddress("192.168.0.190");
-        mTcpClient.setIpPortVar(8080);
-
-        // Create the Connect Task
-        mConnectTask = new ConnectTask();
-        Log.d("HomeActivity","ConnectTask created");
-
         mTcpClient.addMessageListener(this);
-
-        // Execute the connect task
-        mConnectTask.execute();
-        Log.d("HomeActivity","ConnectTask executed");
 
         Spinner difficultySpinner = findViewById(R.id.difficultySpinner);
         String[] difficultyLevels = getResources().getStringArray(R.array.difficulty_levels);
@@ -93,7 +82,7 @@ public class HomeActivity extends Activity implements View.OnClickListener, TCPC
 
         // setting up the ip port address and connect button
         iPandPort = findViewById(R.id.IPandPort);
-        iPandPort.setText("192.168.0.144:8080");
+        iPandPort.setText("Enter IP address:8080"); //set default IP and port
         connectButton = findViewById(R.id.ConnectButton);
         //connectionStatus = findViewById(R.id.ConnectionStatus);
 
@@ -107,27 +96,42 @@ public class HomeActivity extends Activity implements View.OnClickListener, TCPC
         //connectionStatus.setText("Connected.");
         runOnUiThread(() -> {
             Toast.makeText(this, "Connected!", Toast.LENGTH_SHORT).show();
+            connectButton.setText("Connected");
+            connectButton.setEnabled(false); // disable button when connected
         });
-
-
     }
 
     public void connectTablet(View view) {
 
         // function to start the connect tablet process
-        String ipInput = iPandPort.getText().toString();
-        String ipaddress = ipInput.split(":")[0];
-        String ipport = ipInput.split(":")[1];
-        ConnectTask connectTask = new ConnectTask();
-        connectTask.execute(ipaddress, ipport);
+        String ipInput = iPandPort.getText().toString().trim();
 
-        //connectionStatus.setText("Trying to connect to server");
-        Toast.makeText(this, "Trying to connect to server...", Toast.LENGTH_SHORT).show();
+        if (ipInput.isEmpty()) {
+            Toast.makeText(this, "Please enter IP address and port", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
+        boolean isValidInput = mTcpClient.setIpAndPort(ipInput);
+
+        if (!isValidInput) {
+            Toast.makeText(this, "Invalid IP address or port format.", Toast.LENGTH_LONG).show();
+        }
+
+        iPandPort.setText(mTcpClient.getIpAddress() + ":" + mTcpClient.getIpPortVar());
+
+        //disable button show connecting status
+
+        connectButton.setText("Connecting...");
+        connectButton.setEnabled(false);
+
+        //start connection task
+        mConnectTask = new ConnectTask();
+        mConnectTask.execute();
+
+        Toast.makeText(this, "trying to connect to server", Toast.LENGTH_SHORT).show();
     }
     @Override
     public void onClick(View v) {
-
         //onclick function to start the connect tablet function defined above
         if (v.getId() == R.id.ConnectButton) {
             connectTablet(v);
@@ -161,28 +165,22 @@ public class HomeActivity extends Activity implements View.OnClickListener, TCPC
                 // If connection is successful, update the button on the UI thread
                 runOnUiThread(() -> {
                     connectButton.setText("Connected");
+                    connectButton.setEnabled(false);
+                    Toast.makeText(HomeActivity.this,"Connected successfully!", Toast.LENGTH_SHORT).show();
                 });
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mTcpClient.startListening();
+                    }
+                }).start();
             } else {
                 runOnUiThread(() -> {
                     connectButton.setText("Connection failed");
+                    connectButton.setEnabled(true);
+                    Toast.makeText(HomeActivity.this, "Connection failed please check IP and try again!", Toast.LENGTH_LONG).show();
                 });
-            }if (isSuccessful) {
-                // If connection is successful, update the button on the UI thread
-                runOnUiThread(() -> {
-                    connectButton.setText("Connected");
-                });
-            } else {
-                runOnUiThread(() -> {
-                    connectButton.setText("Connection failed");
-                });
-            }
-            Log.d("ConnectTask", "onPostExecute called");
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    mTcpClient.startListening();
-                }
-            }).start();
+            } Log.d("ConnectTask", "onPostExecute called");
         }
     }
     @Override
@@ -190,6 +188,7 @@ public class HomeActivity extends Activity implements View.OnClickListener, TCPC
         runOnUiThread(() -> {
             //update UI
             Log.e("HomeActivity", "Message received: " + message);
+            Toast.makeText(this,"Message " + message, Toast.LENGTH_SHORT).show();
         });
     }
 
@@ -198,6 +197,7 @@ public class HomeActivity extends Activity implements View.OnClickListener, TCPC
         super.onDestroy();
         //remove listener in ondestroy
         mTcpClient.removeMessageListener(this);
+        mTcpClient.disconnect();
         Log.d("HomeActivity", "Listener removed in onDestroy");
     }
 }
