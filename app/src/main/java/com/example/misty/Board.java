@@ -55,7 +55,7 @@ public class Board {
                 if (board[i][j].getVisible()) {
                     System.out.print(board[i][j].getValue() + " ");
                 } else {
-                    System.out.print("X ");
+                    System.out.print("f ");
                 }
             }
             System.out.println();

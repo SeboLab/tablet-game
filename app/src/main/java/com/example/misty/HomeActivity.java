@@ -68,6 +68,11 @@ public class HomeActivity extends Activity implements View.OnClickListener, TCPC
 
         Button startButton = findViewById(R.id.startButton);
         startButton.setOnClickListener(v -> {
+            new Thread(() -> {
+                if (mTcpClient != null && mTcpClient.isConnected()) {
+                    mTcpClient.sendMessage("Game Started");
+                }
+            }).start();
             // Go to Avatar Selection Page before starting the game
             Intent intent = new Intent(HomeActivity.this, AvatarSelectionActivity.class);
             intent.putExtra("difficulty", selectedDifficulty);
