@@ -51,7 +51,7 @@ public class GameTimer {
                         client.run();
                     }
                     if (client.isConnected()) {
-                        //client.sendMessage("Timer;" + "timer finished");
+                        client.sendMessage("Timer;" + "timer finished");
                         Log.d("GameTimer", "Sent TIMER_FINISHED over TCP");
 
                     } else {

@@ -82,7 +82,7 @@ public class HomeActivity extends Activity implements View.OnClickListener, TCPC
 
         // setting up the ip port address and connect button
         iPandPort = findViewById(R.id.IPandPort);
-        iPandPort.setText("Enter IP address:8080"); //set default IP and port
+        iPandPort.setText("Enter IP address:8080"); //set default port asks for IP address
         connectButton = findViewById(R.id.ConnectButton);
         //connectionStatus = findViewById(R.id.ConnectionStatus);
 
@@ -103,7 +103,7 @@ public class HomeActivity extends Activity implements View.OnClickListener, TCPC
 
     public void connectTablet(View view) {
 
-        // function to start the connect tablet process
+        //gets IP input from EditText and trims whitespace
         String ipInput = iPandPort.getText().toString().trim();
 
         if (ipInput.isEmpty()) {
@@ -118,6 +118,7 @@ public class HomeActivity extends Activity implements View.OnClickListener, TCPC
         }
 
         iPandPort.setText(mTcpClient.getIpAddress() + ":" + mTcpClient.getIpPortVar());
+        //updates input field with validated/corrected IP and port
 
         //disable button show connecting status
 
@@ -127,6 +128,8 @@ public class HomeActivity extends Activity implements View.OnClickListener, TCPC
         //start connection task
         mConnectTask = new ConnectTask();
         mConnectTask.execute();
+        //creates and executes background connection task
+
 
         Toast.makeText(this, "trying to connect to server", Toast.LENGTH_SHORT).show();
     }

@@ -174,10 +174,10 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
             String[] parts = message.split(";");
             Log.d("GamePage", "messageReceived: parts length: " + parts.length);
 
-            if (timerExpired) {
-                Log.d("GamePage", "Timer has expired" + timerExpired);
-                return;
-            }
+            //if (timerExpired) {
+              //  Log.d("GamePage", "Timer has expired" + timerExpired);
+              //  return;
+            //}
 
             if (parts.length >= 2) {
                 String type = parts[0].trim();
@@ -263,7 +263,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
         System.out.println("Misty is playing by specified move...");
 
         if (row < 0 || row >= ROWS || col < 0 || col >= COLUMNS) {
-            Log.e("Gamepage", "invalud coordinates: row" + row + ", col= " + col);
+            Log.e("Gamepage", "invalid coordinates: row" + row + ", col= " + col);
 
             mistySpeaking = false;
             mistyTurnOver = true;
@@ -426,11 +426,10 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
             return;
         }
 
-        if (timerExpired) {
-            Log.d("GamePage", "buttonClick: Main timer already expired. No action.");
-            //Toast.makeText(GamePage.this, "Time's UP!", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        //if (timerExpired) {
+        //Log.d("GamePage", "buttonClick: Main timer already expired. No action.");
+        //Toast.makeText(GamePage.this, "Time's UP!", Toast.LENGTH_SHORT).show();
+       // return;
         if (leftRevealed[row][column]) {
             Log.d("Gamepage", "Tile already revealed at row " + row + "col," + column);
             return;
@@ -438,11 +437,12 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
         if (!hasTimerStarted) {
             hasTimerStarted = true;
             GameTimer.getInstance().startTimer(() -> {
-                //runOnUiThread(() -> Toast.makeText(GamePage.this, "Time's up", Toast.LENGTH_SHORT).show());
-                timerExpired = true;
+                runOnUiThread(() ->
+                        Toast.makeText(GamePage.this, "Time's up!", Toast.LENGTH_SHORT).show()
+                );
                 Log.d("GamePage", "Timer expired");
             });
-        }
+                    }
         Log.d("GamePage", "Player making move at row" + row + "col " + column);
 
         char v = flipButton(row, column, true); //player's turn
