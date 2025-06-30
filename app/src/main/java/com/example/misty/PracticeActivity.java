@@ -241,7 +241,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
 
         if (!mistyTurnOver || mistySpeaking) {
             Log.d("PracticeActivity", "Blocked: Misty is playing or speaking.");
-            Toast.makeText(this, "Wait for Misty to finish!", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "Wait for Misty to finish!", Toast.LENGTH_SHORT).show();
             return;
         }
         if (leftRevealed[row][column]) {

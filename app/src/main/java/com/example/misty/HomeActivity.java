@@ -59,7 +59,7 @@ public class HomeActivity extends Activity implements View.OnClickListener, TCPC
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 selectedDifficulty = difficultyLevels[position]; // Store selected difficulty
-                Toast.makeText(HomeActivity.this, "Selected: " + selectedDifficulty, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(HomeActivity.this, "Selected: " + selectedDifficulty, Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -100,7 +100,7 @@ public class HomeActivity extends Activity implements View.OnClickListener, TCPC
         // to display the connected status
         //connectionStatus.setText("Connected.");
         runOnUiThread(() -> {
-            Toast.makeText(this, "Connected!", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "Connected!", Toast.LENGTH_SHORT).show();
             connectButton.setText("Connected");
             connectButton.setEnabled(false); // disable button when connected
         });
@@ -136,7 +136,7 @@ public class HomeActivity extends Activity implements View.OnClickListener, TCPC
         //creates and executes background connection task
 
 
-        Toast.makeText(this, "trying to connect to server", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "trying to connect to server", Toast.LENGTH_SHORT).show();
     }
     @Override
     public void onClick(View v) {
@@ -174,7 +174,7 @@ public class HomeActivity extends Activity implements View.OnClickListener, TCPC
                 runOnUiThread(() -> {
                     connectButton.setText("Connected");
                     connectButton.setEnabled(false);
-                    Toast.makeText(HomeActivity.this,"Connected successfully!", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(HomeActivity.this,"Connected successfully!", Toast.LENGTH_SHORT).show();
                 });
                 new Thread(new Runnable() {
                     @Override
@@ -196,7 +196,7 @@ public class HomeActivity extends Activity implements View.OnClickListener, TCPC
         runOnUiThread(() -> {
             //update UI
             Log.e("HomeActivity", "Message received: " + message);
-            Toast.makeText(this,"Message " + message, Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this,"Message " + message, Toast.LENGTH_SHORT).show();
         });
     }
 

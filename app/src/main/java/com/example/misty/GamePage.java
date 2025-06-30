@@ -422,7 +422,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
 
         if (!mistyTurnOver || mistySpeaking) {
             Log.d("GamePage", "Blocked: Misty is playing or speaking.");
-            Toast.makeText(this, "Wait for Misty to finish!", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "Wait for Misty to finish!", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -437,9 +437,9 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
         if (!hasTimerStarted) {
             hasTimerStarted = true;
             GameTimer.getInstance().startTimer(() -> {
-                runOnUiThread(() ->
-                        Toast.makeText(GamePage.this, "Time's up!", Toast.LENGTH_SHORT).show()
-                );
+                //runOnUiThread(() ->
+                  //      Toast.makeText(GamePage.this, "Time's up!", Toast.LENGTH_SHORT).show()
+                //);
                 Log.d("GamePage", "Timer expired");
             });
                     }

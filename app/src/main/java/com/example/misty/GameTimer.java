@@ -10,7 +10,7 @@ public class GameTimer {
     private CountDownTimer timer;
 
 
-    private long remainingTime = 60000; //5 minutes in milliseconds
+    private long remainingTime = 5* 60000; //5 minutes in milliseconds
     private boolean isRunning = false;
     private GameTimerListener listener;
 
@@ -34,10 +34,29 @@ public class GameTimer {
         isRunning = true;
 
         timer = new CountDownTimer(remainingTime, 60000) {
+            int tickCount = 0;
+
             @Override
             public void onTick(long millisUntilFinished) {
+                tickCount++;
                 remainingTime = millisUntilFinished;
-            }
+
+            int minutePassed = tickCount;
+
+            new Thread(() -> {
+                TCPClient client = TCPClient.getInstance();
+                if (!client.isConnected()) {
+                    client.run();
+                }
+                if (client.isConnected()) {
+                    client.sendMessage("Timer;minute" + minutePassed + "up");
+                    Log.d("GameTimer", "Sent minute " + minutePassed + "up");
+
+                } else {
+                    Log.e("GameTimer", "TCPClient not connected. Could not update minute");
+                }
+            }).start();
+        }
 
             @Override
             public void onFinish() {
