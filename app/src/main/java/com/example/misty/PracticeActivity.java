@@ -135,7 +135,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
         }
     }
 
-    private void initializeBoard(GridLayout gridLayout, Button[][] buttons, char[][] numbers, boolean[][] revealed, boolean isLeftBoard) {
+    private void initializeBoard(GridLayout gridLayout, Button[][] buttons, char[][] numbers, boolean[][] revealed, boolean isRightBoard) {
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
         int screenWidth = displayMetrics.widthPixels;
         int screenHeight = displayMetrics.heightPixels;
@@ -165,7 +165,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
 
                 buttons[row][col].setBackgroundResource(R.drawable.dirt);
 
-                if (isLeftBoard) {
+                if (isRightBoard) {
                     buttons[row][col].setOnClickListener(v -> buttonClick(r, c));
                 } else {
                     buttons[row][col].setEnabled(false);
@@ -250,7 +250,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
         }
         Log.d("PracticeActivity", "Player making move at row" + row + "col " + column);
 
-        char v = flipButton(row, column, true); //player's turn
+        char v = flipButton(row, column, false); //player's turn
         //we check that v was not equal to a, since a is returned if the button has already been clicked.
         if (v != 'a') {
             //set misty turn state
@@ -263,10 +263,10 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
         }
     }
 
-    private char flipButton(int row, int col, boolean isLeftBoard) {
-        Button[][] buttons = isLeftBoard ? leftButtons : rightButtons;
-        char[][] numbers = isLeftBoard ? leftNumbers : rightNumbers;
-        boolean[][] revealed = isLeftBoard ? leftRevealed : rightRevealed;
+    private char flipButton(int row, int col, boolean isRightBoard) {
+        Button[][] buttons = isRightBoard ? leftButtons : rightButtons;
+        char[][] numbers = isRightBoard ? leftNumbers : rightNumbers;
+        boolean[][] revealed = isRightBoard ? leftRevealed : rightRevealed;
 
         if (!revealed[row][col]) {
             //buttons[row][col].setText(String.valueOf(numbers[row][col]));
@@ -275,25 +275,25 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
 
             runOnUiThread(() -> {
                 if (numbers[row][col] == 'G') {
-                    if (isLeftBoard) {
-                        leftGoldCount++;
-                        if (leftGoldCountText != null) {
-                            leftGoldCountText.setText(" " + leftGoldCount);
-                        }
-
-                    } else {
+                    if (isRightBoard) {
                         rightGoldCount++;
                         if (rightGoldCountText != null) {
                             rightGoldCountText.setText(" " + rightGoldCount);
                         }
 
+                    } else {
+                        leftGoldCount++;
+                        if (leftGoldCountText != null) {
+                            leftGoldCountText.setText(" " + leftGoldCount);
+                        }
+
                     }
                     buttons[row][col].setBackgroundResource(R.drawable.gold); // this will show gold image
-                    new Handler(Looper.getMainLooper()).postDelayed(() -> resetBoard(isLeftBoard), 5000);
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> resetBoard(isRightBoard), 5000);
                     // mistyTurnOver = true;
                 } else if (numbers[row][col] == 'B') {
                     buttons[row][col].setBackgroundResource(R.drawable.bomb); // this will show bomb image
-                    new Handler(Looper.getMainLooper()).postDelayed(() -> resetBoard(isLeftBoard), 5000);
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> resetBoard(isRightBoard), 5000);
                     //mistyTurnOver = true;
                 } else {
                     buttons[row][col].setText(String.valueOf(numbers[row][col])); // this will show the number of squares away from the bomb
@@ -354,7 +354,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
 
         Log.d("PracticeActivity", " Misty flipping tile at row" + row + ",col " + col);
 
-        char mv = flipButton(row, col, false); // Misty plays on right board
+        char mv = flipButton(row, col, true); // Misty plays on right board
 
         //we check that v was not equal to a, since a is returned if the button has already been clicked.
         if (mv != 'a') {
@@ -493,24 +493,8 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
             }, delayMillis);
         }
     }
-    private void resetBoard(boolean isLeftBoard) {
-        if (isLeftBoard) {
-            leftGame = new Board(ROWS, COLUMNS);
-            generateShuffledNumbers(leftGame, leftNumbers, leftRevealed);
-
-            for (int row = 0; row < ROWS; row++) {
-                for (int col = 0; col < COLUMNS; col++) {
-                    leftButtons[row][col].setText("");
-                    leftButtons[row][col].setBackgroundResource(R.drawable.dirt);
-                    leftRevealed[row][col] = false;
-                }
-            }
-            //only enable board if player's turn and misty isn't speaking
-            if (mistyTurnOver && !mistySpeaking) {
-                enableUserBoard();
-            }
-            //if misty active board stays disabled until her turn ends
-        } else {
+    private void resetBoard(boolean isRightBoard) {
+        if (isRightBoard) {
             rightGame = new Board(ROWS, COLUMNS);
             generateShuffledNumbers(rightGame, rightNumbers, rightRevealed);
 
@@ -521,9 +505,25 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
                     rightRevealed[row][col] = false;
                 }
             }
+            //only enable board if player's turn and misty isn't speaking
+            if (mistyTurnOver && !mistySpeaking) {
+                enableUserBoard();
+            }
+            //if misty active board stays disabled until her turn ends
+        } else {
+            leftGame = new Board(ROWS, COLUMNS);
+            generateShuffledNumbers(leftGame, leftNumbers, leftRevealed);
+
+            for (int row = 0; row < ROWS; row++) {
+                for (int col = 0; col < COLUMNS; col++) {
+                    leftButtons[row][col].setText("");
+                    leftButtons[row][col].setBackgroundResource(R.drawable.dirt);
+                    leftRevealed[row][col] = false;
+                }
+            }
         }
     }
-    //loop through all buttons on left board
+    //loop through all buttons on right board
     //disables each button so player cannot click any tiles
     //used right after player makes a move during misty's turn
     private void disableUserBoard() {
@@ -531,12 +531,12 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
         runOnUiThread(() -> {
             for (int row = 0; row < ROWS; row++) {
                 for (int col = 0; col < COLUMNS; col++) {
-                    leftButtons[row][col].setEnabled(false);
+                    rightButtons[row][col].setEnabled(false);
                 }
             }
         });
     }
-    //loops through all buttons on left board
+    //loops through all buttons on right board
     //enables only unrevealed tiles
     //makes sure players can click only hidden tiles
     //used after misty finishes her turn and speaking to give control back to player
@@ -546,8 +546,8 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
             if (mistyTurnOver && !mistySpeaking) {
                 for (int row = 0; row < ROWS; row++) {
                     for (int col = 0; col < COLUMNS; col++) {
-                        if (!leftRevealed[row][col]) {
-                            leftButtons[row][col].setEnabled(true);
+                        if (!rightRevealed[row][col]) {
+                            rightButtons[row][col].setEnabled(true);
                         }
                     }
                 }
