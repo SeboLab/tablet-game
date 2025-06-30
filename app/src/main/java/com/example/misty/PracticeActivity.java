@@ -344,7 +344,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
             enableUserBoard();
             return;
         }
-        if (rightRevealed[row][col]) {
+        if (leftRevealed[row][col]) {
             Log.d("PracticeActivity", "Tile already revealed at row" + row + ", col= " + col);
             mistySpeaking = false;
             mistyTurnOver = false;

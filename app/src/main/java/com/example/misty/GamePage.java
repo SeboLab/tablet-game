@@ -270,7 +270,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
             enableUserBoard();
             return;
         }
-        if (rightRevealed[row][col]) {
+        if (leftRevealed[row][col]) {
             Log.d("Gamepage", "Tile already revealed at row" + row + ", col= " + col);
             mistySpeaking = false;
             mistyTurnOver = false;
@@ -430,7 +430,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
         //Log.d("GamePage", "buttonClick: Main timer already expired. No action.");
         //Toast.makeText(GamePage.this, "Time's UP!", Toast.LENGTH_SHORT).show();
        // return;
-        if (leftRevealed[row][column]) {
+        if (rightRevealed[row][column]) {
             Log.d("Gamepage", "Tile already revealed at row " + row + "col," + column);
             return;
         }
