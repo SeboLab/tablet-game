@@ -89,8 +89,8 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
         generateShuffledNumbers(leftGame, leftNumbers, leftRevealed);
         generateShuffledNumbers(rightGame, rightNumbers, rightRevealed);
 
-        initializeBoard(leftGridLayout, leftButtons, leftNumbers, leftRevealed, true);
-        initializeBoard(rightGridLayout, rightButtons, rightNumbers, rightRevealed, false);
+        initializeBoard(leftGridLayout, leftButtons, leftNumbers, leftRevealed, false);
+        initializeBoard(rightGridLayout, rightButtons, rightNumbers, rightRevealed, true);
 
         setupGridLabels();
 
@@ -250,7 +250,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
         }
         Log.d("PracticeActivity", "Player making move at row" + row + "col " + column);
 
-        char v = flipButton(row, column, false); //player's turn
+        char v = flipButton(row, column, true); //player's turn
         //we check that v was not equal to a, since a is returned if the button has already been clicked.
         if (v != 'a') {
             //set misty turn state
@@ -264,9 +264,9 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
     }
 
     private char flipButton(int row, int col, boolean isRightBoard) {
-        Button[][] buttons = isRightBoard ? leftButtons : rightButtons;
-        char[][] numbers = isRightBoard ? leftNumbers : rightNumbers;
-        boolean[][] revealed = isRightBoard ? leftRevealed : rightRevealed;
+        Button[][] buttons = isRightBoard ? rightButtons : leftButtons;
+        char[][] numbers = isRightBoard ? rightNumbers : leftNumbers;
+        boolean[][] revealed = isRightBoard ? rightRevealed : leftRevealed;
 
         if (!revealed[row][col]) {
             //buttons[row][col].setText(String.valueOf(numbers[row][col]));
@@ -354,7 +354,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
 
         Log.d("PracticeActivity", " Misty flipping tile at row" + row + ",col " + col);
 
-        char mv = flipButton(row, col, true); // Misty plays on right board
+        char mv = flipButton(row, col, false); // Misty plays on left board
 
         //we check that v was not equal to a, since a is returned if the button has already been clicked.
         if (mv != 'a') {

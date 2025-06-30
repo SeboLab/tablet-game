@@ -89,16 +89,16 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
         String avatar = getIntent().getStringExtra("avatar");
         if (avatar == null) avatar = "Red";
 
-        ImageView leftAvatarImage = findViewById(R.id.leftAvatarImage);
-        ImageView rightAvatarImage = findViewById(R.id.rightAvatarImage);
+        ImageView leftAvatarImage = findViewById(R.id.rightAvatarImage);
+        ImageView rightAvatarImage = findViewById(R.id.leftAvatarImage);
 
         if ("Red".equals(avatar)) {
-            leftAvatarImage.setImageResource(R.drawable.fire);
             rightAvatarImage.setImageResource(R.drawable.water);
+            leftAvatarImage.setImageResource(R.drawable.fire);
 
         } else {
-            leftAvatarImage.setImageResource(R.drawable.water);
             rightAvatarImage.setImageResource(R.drawable.fire);
+            leftAvatarImage.setImageResource(R.drawable.water);
         }
 
         //calling from the xml file with the linear layout
@@ -149,8 +149,8 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
         generateShuffledNumbers(leftGame, leftNumbers, leftRevealed);
         generateShuffledNumbers(rightGame, rightNumbers, rightRevealed);
 
-        initializeBoard(leftGridLayout, leftButtons, leftNumbers, leftRevealed, true);
-        initializeBoard(rightGridLayout, rightButtons, rightNumbers, rightRevealed, false);
+        initializeBoard(leftGridLayout, leftButtons, leftNumbers, leftRevealed, false);
+        initializeBoard(rightGridLayout, rightButtons, rightNumbers, rightRevealed, true);
 
         Button backHomeButton = findViewById(R.id.backHomeButton);
         backHomeButton.setOnClickListener(v -> {
@@ -373,7 +373,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
         }
     }
 
-    private void initializeBoard(GridLayout gridLayout, Button[][] buttons, char[][] numbers, boolean[][] revealed, boolean isLeftBoard) {
+    private void initializeBoard(GridLayout gridLayout, Button[][] buttons, char[][] numbers, boolean[][] revealed, boolean isRightBoard) {
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
         int screenWidth = displayMetrics.widthPixels;
         int screenHeight = displayMetrics.heightPixels;
@@ -403,7 +403,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
 
                 buttons[row][col].setBackgroundResource(R.drawable.dirt);
 
-                if (isLeftBoard) {
+                if (isRightBoard) {
                     buttons[row][col].setOnClickListener(v -> buttonClick(r, c));
                 } else {
                     buttons[row][col].setEnabled(false);
@@ -541,10 +541,10 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
     }
 
 
-    private char flipButton(int row, int col, boolean isLeftBoard) {
-        Button[][] buttons = isLeftBoard ? leftButtons : rightButtons;
-        char[][] numbers = isLeftBoard ? leftNumbers : rightNumbers;
-        boolean[][] revealed = isLeftBoard ? leftRevealed : rightRevealed;
+    private char flipButton(int row, int col, boolean isRightBoard) {
+        Button[][] buttons = isRightBoard ? rightButtons : leftButtons;
+        char[][] numbers = isRightBoard ? rightNumbers : leftNumbers;
+        boolean[][] revealed = isRightBoard ? rightRevealed : leftRevealed;
 
         if (!revealed[row][col]) {
             //buttons[row][col].setText(String.valueOf(numbers[row][col]));
@@ -553,25 +553,25 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
 
             runOnUiThread(() -> {
                 if (numbers[row][col] == 'G') {
-                    if (isLeftBoard) {
-                        leftGoldCount++;
-                        if (leftGoldCountText != null) {
-                            leftGoldCountText.setText(" " + leftGoldCount);
-                        }
-
-                    } else {
+                    if (isRightBoard) {
                         rightGoldCount++;
                         if (rightGoldCountText != null) {
                             rightGoldCountText.setText(" " + rightGoldCount);
                         }
 
+                    } else {
+                        leftGoldCount++;
+                        if (leftGoldCountText != null) {
+                            leftGoldCountText.setText(" " + leftGoldCount);
+                        }
+
                     }
                     buttons[row][col].setBackgroundResource(R.drawable.gold); // this will show gold image
-                    new Handler(Looper.getMainLooper()).postDelayed(() -> resetBoard(isLeftBoard), 5000);
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> resetBoard(isRightBoard), 5000);
                     // mistyTurnOver = true;
                 } else if (numbers[row][col] == 'B') {
                     buttons[row][col].setBackgroundResource(R.drawable.bomb); // this will show bomb image
-                    new Handler(Looper.getMainLooper()).postDelayed(() -> resetBoard(isLeftBoard), 5000);
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> resetBoard(isRightBoard), 5000);
                     //mistyTurnOver = true;
                 } else {
                     buttons[row][col].setText(String.valueOf(numbers[row][col])); // this will show the number of squares away from the bomb
@@ -593,29 +593,13 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
     // finish();
     //}
 
-    //utilized the boolean flag isLeftBoard that was in the flipButton
+    //utilized the boolean flag isRightBoard that was in the flipButton
     //if it's the left board then go into that condition
     //if not then it'd be the right baord that'd get updated
     //above was the reset game but it resets the whole game
     //so i changed it to reset board so it changes the individual board
-    private void resetBoard(boolean isLeftBoard) {
-        if (isLeftBoard) {
-            leftGame = new Board(ROWS, COLUMNS);
-            generateShuffledNumbers(leftGame, leftNumbers, leftRevealed);
-
-            for (int row = 0; row < ROWS; row++) {
-                for (int col = 0; col < COLUMNS; col++) {
-                    leftButtons[row][col].setText("");
-                    leftButtons[row][col].setBackgroundResource(R.drawable.dirt);
-                    leftRevealed[row][col] = false;
-                }
-            }
-            //only enable board if player's turn and misty isn't speaking
-            if (mistyTurnOver && !mistySpeaking) {
-                enableUserBoard();
-            }
-            //if misty active board stays disabled until her turn ends
-        } else {
+    private void resetBoard(boolean isRightBoard) {
+        if (isRightBoard) {
             rightGame = new Board(ROWS, COLUMNS);
             generateShuffledNumbers(rightGame, rightNumbers, rightRevealed);
 
@@ -624,6 +608,22 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
                     rightButtons[row][col].setText("");
                     rightButtons[row][col].setBackgroundResource(R.drawable.dirt);
                     rightRevealed[row][col] = false;
+                }
+            }
+            //only enable board if player's turn and misty isn't speaking
+            if (mistyTurnOver && !mistySpeaking) {
+                enableUserBoard();
+            }
+            //if misty active board stays disabled until her turn ends
+        } else {
+            leftGame = new Board(ROWS, COLUMNS);
+            generateShuffledNumbers(leftGame, leftNumbers, leftRevealed);
+
+            for (int row = 0; row < ROWS; row++) {
+                for (int col = 0; col < COLUMNS; col++) {
+                    leftButtons[row][col].setText("");
+                    leftButtons[row][col].setBackgroundResource(R.drawable.dirt);
+                    leftRevealed[row][col] = false;
                 }
             }
         }
@@ -654,7 +654,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
         runOnUiThread(() -> {
             for (int row = 0; row < ROWS; row++) {
                 for (int col = 0; col < COLUMNS; col++) {
-                    leftButtons[row][col].setEnabled(false);
+                    rightButtons[row][col].setEnabled(false);
                 }
             }
         });
@@ -670,8 +670,8 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
             if (mistyTurnOver && !mistySpeaking) {
                 for (int row = 0; row < ROWS; row++) {
                     for (int col = 0; col < COLUMNS; col++) {
-                        if (!leftRevealed[row][col]) {
-                            leftButtons[row][col].setEnabled(true);
+                        if (!rightRevealed[row][col]) {
+                            rightButtons[row][col].setEnabled(true);
                         }
                     }
                 }
