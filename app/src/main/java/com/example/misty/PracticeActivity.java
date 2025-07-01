@@ -2,6 +2,7 @@ package com.example.misty;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -10,6 +11,7 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.ImageView;
@@ -153,7 +155,8 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
                 //buttons[row][col].setScaleType(ImageView.ScaleType.CENTER_CROP);
                 //buttons[row][col].setAdjustViewBounds(true);
                 buttons[row][col].setText("");
-                buttons[row][col].setTextSize(15);
+                buttons[row][col].setTextSize(20);
+                buttons[row][col].setTypeface(null, Typeface.BOLD);
 
                 GridLayout.LayoutParams params = new GridLayout.LayoutParams();
                 params.rowSpec = GridLayout.spec(row);
@@ -192,7 +195,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
             columnPadding = 60;
             rowPadding = 40;
         } else { // Easy mode (3x3)
-            columnPadding = 80;
+            columnPadding = 60;
             rowPadding = 50;
         }
 
@@ -204,6 +207,23 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
             colLabelLeft.setTextColor(Color.WHITE);
             colLabelLeft.setTextSize(22); // Reduce text size slightly
             colLabelLeft.setPadding(columnPadding, 10, columnPadding, 10);
+// Set wider layout params
+            LinearLayout.LayoutParams labelParams = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+            labelParams.width = 190; // adjust as needed
+            colLabelLeft.setLayoutParams(labelParams);
+
+// Translate only after layout is handled
+            if (i == 0) {
+                colLabelLeft.setTranslationX(40); // shift right
+            } else if (i == 1) {
+                colLabelLeft.setTranslationX(40); // shift more
+            }else if(i == 2){
+                colLabelLeft.setTranslationX(40);
+            }
+
             leftColumnNumbers.addView(colLabelLeft);
 
             TextView colLabelRight = new TextView(this);
@@ -212,6 +232,22 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
             colLabelRight.setTextColor(Color.WHITE);
             colLabelRight.setGravity(Gravity.CENTER);
             colLabelRight.setPadding(columnPadding, 10, columnPadding, 10);
+            // Set wider layout params
+            labelParams = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+            labelParams.width = 190; // adjust as needed
+            colLabelRight.setLayoutParams(labelParams);
+
+// Translate only after layout is handled
+            if (i == 0) {
+                colLabelRight.setTranslationX(40); // shift right
+            } else if (i == 1) {
+                colLabelRight.setTranslationX(40); // shift more
+            }else if(i == 2){
+                colLabelRight.setTranslationX(40);
+            }
             rightColumnNumbers.addView(colLabelRight);
         }
 
@@ -223,7 +259,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
             rowLabelLeft.setTextColor(Color.WHITE);
 
             // Adjust padding dynamically
-            rowPadding = (ROWS == 3) ? 50 : (ROWS == 5) ? 40 : 20;
+            rowPadding = (ROWS == 3) ? 60 : (ROWS == 5) ? 40 : 20;
             rowLabelLeft.setPadding(50, rowPadding, 10, rowPadding);
             leftRowNumbers.addView(rowLabelLeft);
 
@@ -298,7 +334,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
                 } else {
                     buttons[row][col].setText(String.valueOf(numbers[row][col])); // this will show the number of squares away from the bomb
                     buttons[row][col].setTextColor(Color.BLACK);
-                    buttons[row][col].setBackgroundColor(Color.LTGRAY);
+                    buttons[row][col].setBackgroundColor(Color.parseColor("#c58e61"));
                     //mistyTurnOver = true;
                 }
             });
