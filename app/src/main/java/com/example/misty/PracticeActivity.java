@@ -217,11 +217,11 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
 
 // Translate only after layout is handled
             if (i == 0) {
-                colLabelLeft.setTranslationX(40); // shift right
+                colLabelLeft.setTranslationX(90); // shift right
             } else if (i == 1) {
-                colLabelLeft.setTranslationX(40); // shift more
+                colLabelLeft.setTranslationX(30); // shift more
             }else if(i == 2){
-                colLabelLeft.setTranslationX(40);
+                colLabelLeft.setTranslationX(-20);
             }
 
             leftColumnNumbers.addView(colLabelLeft);
@@ -239,14 +239,15 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
             );
             labelParams.width = 190; // adjust as needed
             colLabelRight.setLayoutParams(labelParams);
+            colLabelRight.setLayoutParams(labelParams);
 
 // Translate only after layout is handled
             if (i == 0) {
-                colLabelRight.setTranslationX(40); // shift right
+                colLabelRight.setTranslationX(90); // shift right
             } else if (i == 1) {
-                colLabelRight.setTranslationX(40); // shift more
+                colLabelRight.setTranslationX(30); // shift more
             }else if(i == 2){
-                colLabelRight.setTranslationX(40);
+                colLabelRight.setTranslationX(-20);
             }
             rightColumnNumbers.addView(colLabelRight);
         }
@@ -259,7 +260,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
             rowLabelLeft.setTextColor(Color.WHITE);
 
             // Adjust padding dynamically
-            rowPadding = (ROWS == 3) ? 60 : (ROWS == 5) ? 40 : 20;
+            rowPadding = (ROWS == 3) ? 45 : (ROWS == 5) ? 40 : 20;
             rowLabelLeft.setPadding(50, rowPadding, 10, rowPadding);
             leftRowNumbers.addView(rowLabelLeft);
 
@@ -280,7 +281,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
             //Toast.makeText(this, "Wait for Misty to finish!", Toast.LENGTH_SHORT).show();
             return;
         }
-        if (leftRevealed[row][column]) {
+        if (rightRevealed[row][column]) {
             Log.d("PracticeActivity", "Tile already revealed at row " + row + "col," + column);
             return;
         }
@@ -325,11 +326,11 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
 
                     }
                     buttons[row][col].setBackgroundResource(R.drawable.gold); // this will show gold image
-                    new Handler(Looper.getMainLooper()).postDelayed(() -> resetBoard(isRightBoard), 5000);
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> resetBoard(isRightBoard), 7000);
                     // mistyTurnOver = true;
                 } else if (numbers[row][col] == 'B') {
                     buttons[row][col].setBackgroundResource(R.drawable.bomb); // this will show bomb image
-                    new Handler(Looper.getMainLooper()).postDelayed(() -> resetBoard(isRightBoard), 5000);
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> resetBoard(isRightBoard), 7000);
                     //mistyTurnOver = true;
                 } else {
                     buttons[row][col].setText(String.valueOf(numbers[row][col])); // this will show the number of squares away from the bomb
