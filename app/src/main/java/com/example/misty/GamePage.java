@@ -166,7 +166,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
                     startActivity(intent);
                     finish();
                 }
-            }, 3000);
+            }, 5000);
         });
 
     }
