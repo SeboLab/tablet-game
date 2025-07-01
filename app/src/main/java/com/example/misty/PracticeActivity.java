@@ -326,11 +326,11 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
 
                     }
                     buttons[row][col].setBackgroundResource(R.drawable.gold); // this will show gold image
-                    new Handler(Looper.getMainLooper()).postDelayed(() -> resetBoard(isRightBoard), 7000);
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> resetBoard(isRightBoard), 10000);
                     // mistyTurnOver = true;
                 } else if (numbers[row][col] == 'B') {
                     buttons[row][col].setBackgroundResource(R.drawable.bomb); // this will show bomb image
-                    new Handler(Looper.getMainLooper()).postDelayed(() -> resetBoard(isRightBoard), 7000);
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> resetBoard(isRightBoard), 10000);
                     //mistyTurnOver = true;
                 } else {
                     buttons[row][col].setText(String.valueOf(numbers[row][col])); // this will show the number of squares away from the bomb
@@ -519,7 +519,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
             Log.i("PracticePage", "message being sent: " + messageToSend);
 
             final String mistyTurnMessage = "Mistyturn;" + "started";
-            long delayMillis = 4000; // 4 seconds
+            long delayMillis = 2500; // 4 seconds
 
             delayHandler.postDelayed(new Runnable() {
                 @Override

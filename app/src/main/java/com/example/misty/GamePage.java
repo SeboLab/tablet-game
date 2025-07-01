@@ -92,7 +92,9 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
         if (avatar == null) avatar = "Red";
 
         ImageView leftAvatarImage = findViewById(R.id.rightAvatarImage);
+        leftAvatarImage.setTranslationX(30);
         ImageView rightAvatarImage = findViewById(R.id.leftAvatarImage);
+        rightAvatarImage.setTranslationX(30);
 
         if ("Red".equals(avatar)) {
             rightAvatarImage.setImageResource(R.drawable.water);
@@ -164,7 +166,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
                     startActivity(intent);
                     finish();
                 }
-            }, 5000);
+            }, 3000);
         });
 
     }
@@ -470,7 +472,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
             Log.i("GamePage", "message being sent: " + messageToSend);
 
             final String mistyTurnMessage = "Mistyturn;" + "started";
-            long delayMillis = 4000; // 4 seconds
+            long delayMillis = 2500; // 4 seconds
 
             delayHandler.postDelayed(new Runnable() {
                 @Override
@@ -604,11 +606,11 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
 
                     }
                     buttons[row][col].setBackgroundResource(R.drawable.gold); // this will show gold image
-                    new Handler(Looper.getMainLooper()).postDelayed(() -> resetBoard(isRightBoard), 7000);
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> resetBoard(isRightBoard), 10000);
                     // mistyTurnOver = true;
                 } else if (numbers[row][col] == 'B') {
                     buttons[row][col].setBackgroundResource(R.drawable.bomb); // this will show bomb image
-                    new Handler(Looper.getMainLooper()).postDelayed(() -> resetBoard(isRightBoard), 7000);
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> resetBoard(isRightBoard), 10000);
                     //mistyTurnOver = true;
                 } else {
                     buttons[row][col].setText(String.valueOf(numbers[row][col])); // this will show the number of squares away from the bomb
