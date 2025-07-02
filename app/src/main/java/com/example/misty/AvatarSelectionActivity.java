@@ -1,5 +1,6 @@
 package com.example.misty;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -41,6 +42,7 @@ public class AvatarSelectionActivity extends AppCompatActivity implements  TCPCl
 
 
 
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,15 +70,25 @@ public class AvatarSelectionActivity extends AppCompatActivity implements  TCPCl
 
         // Set click listeners for the avatar buttons
         redAvatarButton.setOnClickListener(v -> {
-            selectedAvatar = "Red";
-            sendAvatarChoice(); // Call method to send choice to TCPClient
-            //handleAvatarSelection(redAvatarButton, "Red");
+            if(redAvatarButton.isPressed()){
+                blueAvatarButton.setEnabled(false);
+                redAvatarButton.setText("Selected");
+                redAvatarButton.setEnabled(false);
+                selectedAvatar = "Red";
+                sendAvatarChoice();// Call method to send choice to TCPClient
+                //handleAvatarSelection(blueAvatarButton, "Blue");
+            }
         });
 
         blueAvatarButton.setOnClickListener(v -> {
-            selectedAvatar = "Blue";
-            sendAvatarChoice();// Call method to send choice to TCPClient
-            //handleAvatarSelection(blueAvatarButton, "Blue");
+            if(blueAvatarButton.isPressed()){
+                redAvatarButton.setEnabled(false);
+                blueAvatarButton.setText("Selected");
+                blueAvatarButton.setEnabled(false);
+                selectedAvatar = "Blue";
+                sendAvatarChoice();// Call method to send choice to TCPClient
+                //handleAvatarSelection(blueAvatarButton, "Blue");
+            }
         });
 
         nextPageButton.setOnClickListener(v -> {

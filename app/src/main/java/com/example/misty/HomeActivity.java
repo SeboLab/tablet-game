@@ -209,7 +209,7 @@ public class HomeActivity extends Activity implements View.OnClickListener, TCPC
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        //remove listener in ondestroy
+        //remove listener in on destroy
         mTcpClient.removeMessageListener(this);
         mTcpClient.disconnect();
         Log.d("HomeActivity", "Listener removed in onDestroy");
