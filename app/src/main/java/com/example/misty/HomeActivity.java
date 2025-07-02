@@ -83,7 +83,7 @@ public class HomeActivity extends Activity implements View.OnClickListener, TCPC
         practiceButton.setOnClickListener(v->{
             new Thread (() -> {
                 if(mTcpClient != null && mTcpClient.isConnected()){
-                    mTcpClient.sendMessage("Practice started");
+                    mTcpClient.sendMessage("Practice;started");
                 }
             }).start();
             Intent intent = new Intent(HomeActivity.this, PracticeActivity.class);
