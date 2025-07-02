@@ -78,8 +78,14 @@ public class HomeActivity extends Activity implements View.OnClickListener, TCPC
             intent.putExtra("difficulty", selectedDifficulty);
             startActivity(intent);
         });
+
         Button practiceButton = findViewById(R.id.practiceButton);
         practiceButton.setOnClickListener(v->{
+            new Thread (() -> {
+                if(mTcpClient != null && mTcpClient.isConnected()){
+                    mTcpClient.sendMessage("Practice started");
+                }
+            }).start();
             Intent intent = new Intent(HomeActivity.this, PracticeActivity.class);
             intent.putExtra("difficulty", selectedDifficulty);
             startActivity(intent);
