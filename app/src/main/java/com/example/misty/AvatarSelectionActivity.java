@@ -54,7 +54,7 @@ public class AvatarSelectionActivity extends AppCompatActivity implements  TCPCl
         selectedDifficulty = getIntent().getStringExtra("difficulty");
 
         TextView avatarText = findViewById(R.id.avatarText);
-        avatarText.setText("Choose Your Avatar for " + selectedDifficulty);
+        avatarText.setText("Choose Your Avatar");
 
 
 

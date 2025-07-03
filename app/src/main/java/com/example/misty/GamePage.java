@@ -11,6 +11,7 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.GridLayout;
@@ -58,11 +59,13 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
 
     private TCPClient mTcpClient = TCPClient.getInstance();
     private Handler delayHandler;
-
+    private TextView turnIndicatorText;
     private boolean mistyTurnOver = true;
     private boolean mistySpeaking = false;
     private int specifiedRow = -1;
     private int specifiedCol = -1;
+    private String playerAvatarColor = "Red";
+    private String mistyAvatarColor = "Blue";
 
 
     private boolean hasTimerStarted = false;
@@ -84,27 +87,13 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
         TextView textViewMode = findViewById(R.id.textViewMode);
         String difficulty = getIntent().getStringExtra("difficulty");
         if (difficulty == null) difficulty = "Easy"; // Default value if null
-        textViewMode.setText(difficulty);
+        textViewMode.setText("");
         leftGoldCountText = findViewById(R.id.leftGoldCountText);
         rightGoldCountText = findViewById(R.id.rightGoldCountText);
 
-        String avatar = getIntent().getStringExtra("avatar");
-        if (avatar == null) avatar = "Red";
-
-        ImageView leftAvatarImage = findViewById(R.id.rightAvatarImage);
-        leftAvatarImage.setTranslationX(30);
-        ImageView rightAvatarImage = findViewById(R.id.leftAvatarImage);
-        rightAvatarImage.setTranslationX(30);
-
-        if ("Red".equals(avatar)) {
-            rightAvatarImage.setImageResource(R.drawable.water);
-            leftAvatarImage.setImageResource(R.drawable.fire);
-
-        } else {
-            rightAvatarImage.setImageResource(R.drawable.fire);
-            leftAvatarImage.setImageResource(R.drawable.water);
-        }
-
+        turnIndicatorText = findViewById(R.id.turnIndicatorText);
+        //put avatar method HERE
+        avatarChosen();
         //calling from the xml file with the linear layout
         leftRowNumbers = findViewById(R.id.leftRowNumbers);
         leftColumnNumbers = findViewById(R.id.leftColumnNumbers);
@@ -159,6 +148,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
         Button backHomeButton = findViewById(R.id.backHomeButton);
         backHomeButton.setOnClickListener(v -> {
             sendHomeButtonClick();
+            backHomeButton.setEnabled(false);
             new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -168,7 +158,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
                 }
             }, 5000);
         });
-
+        showTurnMessage(true,3000);
     }
 
     @Override
@@ -268,7 +258,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
 
         if (row < 0 || row >= ROWS || col < 0 || col >= COLUMNS) {
             Log.e("Gamepage", "invalid coordinates: row" + row + ", col= " + col);
-
+            showTurnMessage(true,3000);
             mistySpeaking = false;
             mistyTurnOver = true;
             enableUserBoard();
@@ -276,6 +266,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
         }
         if (leftRevealed[row][col]) {
             Log.d("Gamepage", "Tile already revealed at row" + row + ", col= " + col);
+            showTurnMessage(true,3000);
             mistySpeaking = false;
             mistyTurnOver = false;
             enableUserBoard();
@@ -296,6 +287,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
             if (delayHandler != null) {
                 delayHandler.postDelayed(() -> {
                     Log.d("GamePage", "misty finished turn delay");
+                    showTurnMessage(true,3000);
                     mistySpeaking = false;
                     mistyTurnOver = true;
                     enableUserBoard();
@@ -304,6 +296,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
             }
         } else {
             Log.e("GamePage", "flipButton returned a tile may already be revealed");
+            showTurnMessage(true,3000);
             //if move invalid reset mity's turn state
             mistySpeaking = false;
             mistyTurnOver = true;
@@ -453,6 +446,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
         char v = flipButton(row, column, true); //player's turn
         //we check that v was not equal to a, since a is returned if the button has already been clicked.
         if (v != 'a') {
+            showTurnMessage(false,3000);
             //set misty turn state
             mistyTurnOver = false; // Misty's turn now
             mistySpeaking = false;
@@ -651,6 +645,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
             }
             //only enable board if player's turn and misty isn't speaking
             if (mistyTurnOver && !mistySpeaking) {
+                showTurnMessage(true,3000);
                 enableUserBoard();
             }
             //if misty active board stays disabled until her turn ends
@@ -719,6 +714,47 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
                 Log.d("GamePage", "Userboard not enabled misty turn over" + mistyTurnOver + " mistySpeaking " + mistySpeaking);
             }
         });
+    }
+    //showTurnMessage(false); --> misty's turn
+    //showTurnMessage(true); --> player's turn
+    private void showTurnMessage(boolean isPlayerTurn, int delayTime) {
+        String turnText = isPlayerTurn ? playerAvatarColor + " Avatar's Turn " :mistyAvatarColor + " Avatar's Turn!";
+        runOnUiThread(() -> {
+            turnIndicatorText.setText(turnText);
+            turnIndicatorText.setVisibility(View.VISIBLE);
+            turnIndicatorText.bringToFront();
+
+            // Hide after 3 seconds
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                turnIndicatorText.setVisibility(View.GONE);
+            }, delayTime);
+        });
+    }
+    private void avatarChosen(){
+
+        String avatar = getIntent().getStringExtra("avatar");
+        if (avatar == null) avatar = "Red";
+
+        if("Red".equals(avatar)){
+            playerAvatarColor = "Red";
+            mistyAvatarColor = "Blue";
+        }else{
+            playerAvatarColor="Blue";
+            mistyAvatarColor = "Red";
+        }
+        ImageView leftAvatarImage = findViewById(R.id.rightAvatarImage);
+        ImageView rightAvatarImage = findViewById(R.id.leftAvatarImage);
+        leftAvatarImage.setTranslationX(30);
+        rightAvatarImage.setTranslationX(30);
+
+        if ("Red".equals(avatar)) {
+            rightAvatarImage.setImageResource(R.drawable.water);
+            leftAvatarImage.setImageResource(R.drawable.fire);
+
+        } else {
+            rightAvatarImage.setImageResource(R.drawable.fire);
+            leftAvatarImage.setImageResource(R.drawable.water);
+        }
     }
 }
 

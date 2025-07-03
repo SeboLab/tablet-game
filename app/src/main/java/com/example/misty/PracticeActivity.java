@@ -1,5 +1,4 @@
 package com.example.misty;
-
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -11,6 +10,7 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.GridLayout;
@@ -18,16 +18,14 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.example.misty.Socketconnection.TCPClient;
 import com.example.misty.Socketconnection.TCPClientOwner;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.Timer;
 
 public class PracticeActivity extends AppCompatActivity implements TCPClient.OnMessageReceived {
     private static final int ROWS = 3;
@@ -57,6 +55,8 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
 
     private TextView leftGoldCountText;
     private TextView rightGoldCountText;
+    private TextView turnIndicatorText;
+
     private int leftGoldCount = 0;
     private int rightGoldCount = 0;
 
@@ -71,6 +71,8 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
             delayHandler = new Handler(Looper.getMainLooper());
         }
         setContentView(R.layout.game_board);
+
+        turnIndicatorText = findViewById(R.id.turnIndicatorText);
 
         leftGoldCountText = findViewById(R.id.leftGoldCountText);
         rightGoldCountText = findViewById(R.id.rightGoldCountText);
@@ -99,6 +101,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
         Button backHomeButton = findViewById(R.id.backHomeButton);
         backHomeButton.setOnClickListener(v -> {
             sendHomeButtonClick();
+            backHomeButton.setEnabled(false);
             new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -108,6 +111,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
                 }
             }, 5000);
         });
+        showTurnMessage("Blue Avatar's turn",3000);
     }
 
     @Override
@@ -290,6 +294,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
         char v = flipButton(row, column, true); //player's turn
         //we check that v was not equal to a, since a is returned if the button has already been clicked.
         if (v != 'a') {
+            showTurnMessage("Red Avatar's Turn!",3000);
             //set misty turn state
             mistyTurnOver = false; // Misty's turn now
             mistySpeaking = false;
@@ -375,7 +380,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
 
         if (row < 0 || row >= ROWS || col < 0 || col >= COLUMNS) {
             Log.e("PracticeActivity", "invalud coordinates: row" + row + ", col= " + col);
-
+            showTurnMessage("Blue Avatar's Turn!",3000);
             mistySpeaking = false;
             mistyTurnOver = true;
             enableUserBoard();
@@ -383,6 +388,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
         }
         if (leftRevealed[row][col]) {
             Log.d("PracticeActivity", "Tile already revealed at row" + row + ", col= " + col);
+            showTurnMessage("Blue Avatar's Turn!!",3000);
             mistySpeaking = false;
             mistyTurnOver = false;
             enableUserBoard();
@@ -403,6 +409,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
             if (delayHandler != null) {
                 delayHandler.postDelayed(() -> {
                     Log.d("PracticeActivity", "misty finished turn delay");
+                    showTurnMessage("Blue Avatar's Turn!!",3000);
                     mistySpeaking = false;
                     mistyTurnOver = true;
                     enableUserBoard();
@@ -411,6 +418,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
             }
         } else {
             Log.e("PracticeActivity", "flipButton returned a tile may already be revealed");
+            showTurnMessage("Blue Avatar's Turn!!",3000);
             //if move invalid reset mity's turn state
             mistySpeaking = false;
             mistyTurnOver = true;
@@ -544,6 +552,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
             }
             //only enable board if player's turn and misty isn't speaking
             if (mistyTurnOver && !mistySpeaking) {
+                showTurnMessage("Red Avatar's turn!",3000);
                 enableUserBoard();
             }
             //if misty active board stays disabled until her turn ends
@@ -592,6 +601,18 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
             } else {
                 Log.d("PracticeActivity", "Userboard not enabled misty turn over" + mistyTurnOver + " mistySpeaking " + mistySpeaking);
             }
+        });
+    }
+    private void showTurnMessage(String message,int delayTime) {
+        runOnUiThread(() -> {
+            turnIndicatorText.setText(message);
+            turnIndicatorText.setVisibility(View.VISIBLE);
+            turnIndicatorText.bringToFront();
+
+            // Hide after 3 seconds
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                turnIndicatorText.setVisibility(View.GONE);
+            }, delayTime);
         });
     }
 }
