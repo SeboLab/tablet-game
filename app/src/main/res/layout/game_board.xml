@@ -8,12 +8,12 @@
         android:id="@+id/gameContent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@android:color/black"
         android:gravity="center_horizontal"
         android:orientation="vertical"
-        android:paddingTop="50dp"
         android:paddingLeft="8dp"
-        android:paddingRight="8dp"
-        android:background="@android:color/black">
+        android:paddingTop="50dp"
+        android:paddingRight="8dp">
 
 
         <!-- Title -->
@@ -21,31 +21,31 @@
             android:id="@+id/textViewMode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Practice Game"
-            android:textSize="18sp"
-            android:textColor="@android:color/white"
-            android:textStyle="bold"
+            android:layout_gravity="center_horizontal"
             android:layout_marginBottom="24dp"
             android:gravity="center"
-            android:layout_gravity="center_horizontal"/>
+            android:text="Practice Game"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
 
         <!-- Boards Container -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:layout_marginBottom="2dp"
             android:gravity="center_horizontal"
-            android:layout_marginBottom="2dp">
+            android:orientation="horizontal">
 
 
-            <!-- Left Board (Human) -->
+            <!-- Left Board (misty) -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
+                android:layout_marginEnd="8dp"
                 android:gravity="center"
-                android:layout_marginEnd="8dp">
+                android:orientation="vertical">
 
 
                 <ImageView
@@ -53,16 +53,16 @@
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:layout_gravity="center_horizontal"
-                    android:src="@drawable/fire"
-                    android:layout_marginBottom="8dp"/>
+                    android:layout_marginBottom="8dp"
+                    android:src="@drawable/fire" />
 
 
                 <LinearLayout
                     android:id="@+id/leftColumnNumbers"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center"/>
+                    android:gravity="center"
+                    android:orientation="horizontal" />
 
 
                 <LinearLayout
@@ -75,14 +75,14 @@
                         android:id="@+id/leftRowNumbers"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"/>
+                        android:orientation="vertical" />
 
 
                     <GridLayout
                         android:id="@+id/leftBoard"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:padding="4dp"/>
+                        android:padding="4dp" />
                 </LinearLayout>
 
 
@@ -90,19 +90,19 @@
                     android:layout_width="60dp"
                     android:layout_height="60dp"
                     android:layout_gravity="center_horizontal"
-                    android:src="@drawable/box"
-                    android:layout_marginBottom="4dp"/>
+                    android:layout_marginBottom="4dp"
+                    android:src="@drawable/box" />
 
 
                 <TextView
                     android:id="@+id/leftGoldCountText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center"
                     android:text="0"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
                     android:textColor="@android:color/white"
-                    android:layout_gravity="center"/>
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
             </LinearLayout>
 
 
@@ -110,9 +110,9 @@
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
+                android:layout_marginStart="4dp"
                 android:gravity="center"
-                android:layout_marginStart="4dp">
+                android:orientation="vertical">
 
 
                 <ImageView
@@ -120,16 +120,16 @@
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:layout_gravity="center_horizontal"
-                    android:src="@drawable/water"
-                    android:layout_marginBottom="4dp"/>
+                    android:layout_marginBottom="4dp"
+                    android:src="@drawable/water" />
 
 
                 <LinearLayout
                     android:id="@+id/rightColumnNumbers"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center"/>
+                    android:gravity="center"
+                    android:orientation="horizontal" />
 
 
                 <LinearLayout
@@ -142,14 +142,14 @@
                         android:id="@+id/rightRowNumbers"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"/>
+                        android:orientation="vertical" />
 
 
                     <GridLayout
                         android:id="@+id/rightBoard"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:padding="4dp"/>
+                        android:padding="4dp" />
                 </LinearLayout>
 
 
@@ -157,19 +157,19 @@
                     android:layout_width="60dp"
                     android:layout_height="60dp"
                     android:layout_gravity="center_horizontal"
-                    android:src="@drawable/box"
-                    android:layout_marginBottom="4dp"/>
+                    android:layout_marginBottom="4dp"
+                    android:src="@drawable/box" />
 
 
                 <TextView
                     android:id="@+id/rightGoldCountText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center"
                     android:text="0"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
                     android:textColor="@android:color/white"
-                    android:layout_gravity="center"/>
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
             </LinearLayout>
         </LinearLayout>
 
@@ -179,13 +179,13 @@
             android:id="@+id/backHomeButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
             android:layout_marginTop="8dp"
+            android:backgroundTint="@color/purple_700"
             android:padding="12dp"
             android:text="Back to Home"
-            android:backgroundTint="@color/purple_700"
             android:textColor="@android:color/white"
-            android:textStyle="bold"
-            android:layout_gravity="center_horizontal"/>
+            android:textStyle="bold" />
     </LinearLayout>
 
 
@@ -194,15 +194,34 @@
         android:id="@+id/turnIndicatorText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="#AA000000"
+        android:gravity="center"
+        android:padding="20dp"
         android:text="Turn"
+        android:textColor="@android:color/white"
         android:textSize="40sp"
         android:textStyle="bold"
-        android:textColor="@android:color/white"
-        android:background="#AA000000"
-        android:padding="20dp"
-        android:gravity="center"
-        android:visibility="gone"
-        android:layout_gravity="center"/>
+        android:visibility="gone" />
+
+    <!-- images that show on top of temperary message -->
+    <ImageView
+        android:id="@+id/rightAvatarImage1"
+        android:layout_width="95dp"
+        android:layout_height="95dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="2dp"
+        android:src="@drawable/water2"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/leftAvatarImage1"
+        android:layout_width="95dp"
+        android:layout_height="95dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="2dp"
+        android:src="@drawable/fire2"
+        android:visibility="gone" />
 
 
     <!-- Optional extra button -->
@@ -210,7 +229,7 @@
         android:id="@+id/gameButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:scaleType="centerCrop"
-        android:adjustViewBounds="true"/>
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop" />
 </FrameLayout>
 

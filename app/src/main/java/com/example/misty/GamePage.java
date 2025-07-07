@@ -446,7 +446,9 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
         char v = flipButton(row, column, true); //player's turn
         //we check that v was not equal to a, since a is returned if the button has already been clicked.
         if (v != 'a') {
-            showTurnMessage(false,3000);
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                showTurnMessage(false, 3000);
+            }, 3000);
             //set misty turn state
             mistyTurnOver = false; // Misty's turn now
             mistySpeaking = false;
@@ -718,15 +720,34 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
     //showTurnMessage(false); --> misty's turn
     //showTurnMessage(true); --> player's turn
     private void showTurnMessage(boolean isPlayerTurn, int delayTime) {
-        String turnText = isPlayerTurn ? playerAvatarColor + " Avatar's Turn " :mistyAvatarColor + " Avatar's Turn!";
+        String turnText = isPlayerTurn ? "      " + playerAvatarColor + " Avatar's Turn " :"      " + mistyAvatarColor + " Avatar's Turn!";
         runOnUiThread(() -> {
             turnIndicatorText.setText(turnText);
             turnIndicatorText.setVisibility(View.VISIBLE);
             turnIndicatorText.bringToFront();
 
-            // Hide after 3 seconds
+            ImageView leftAvatarOverlay = findViewById(R.id.leftAvatarImage1);
+            ImageView rightAvatarOverlay = findViewById(R.id.rightAvatarImage1);
+
+            // Show the correct avatar overlay
+            if (isPlayerTurn) {
+                rightAvatarOverlay.setVisibility(View.VISIBLE);
+                leftAvatarOverlay.setVisibility(View.GONE);
+                rightAvatarOverlay.setTranslationX(-270);
+                rightAvatarOverlay.setTranslationY(425);
+                rightAvatarOverlay.bringToFront();
+            } else {
+                rightAvatarOverlay.setVisibility(View.GONE);
+                leftAvatarOverlay.setVisibility(View.VISIBLE);
+                leftAvatarOverlay.setTranslationX(-270);
+                leftAvatarOverlay.setTranslationY(425);
+                leftAvatarOverlay.bringToFront();
+            }
+
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 turnIndicatorText.setVisibility(View.GONE);
+                leftAvatarOverlay.setVisibility(View.GONE);
+                rightAvatarOverlay.setVisibility(View.GONE);
             }, delayTime);
         });
     }
@@ -735,26 +756,39 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
         String avatar = getIntent().getStringExtra("avatar");
         if (avatar == null) avatar = "Red";
 
-        if("Red".equals(avatar)){
+        if ("Red".equalsIgnoreCase(avatar)) {
             playerAvatarColor = "Red";
             mistyAvatarColor = "Blue";
-        }else{
-            playerAvatarColor="Blue";
+        } else {
+            playerAvatarColor = "Blue";
             mistyAvatarColor = "Red";
         }
-        ImageView leftAvatarImage = findViewById(R.id.rightAvatarImage);
-        ImageView rightAvatarImage = findViewById(R.id.leftAvatarImage);
+        ImageView leftAvatarImage = findViewById(R.id.leftAvatarImage);
+        ImageView rightAvatarImage = findViewById(R.id.rightAvatarImage);
+
+        ImageView leftAvatarOverlay = findViewById(R.id.leftAvatarImage1);
+        ImageView rightAvatarOverlay = findViewById(R.id.rightAvatarImage1);
+
         leftAvatarImage.setTranslationX(30);
         rightAvatarImage.setTranslationX(30);
 
-        if ("Red".equals(avatar)) {
-            rightAvatarImage.setImageResource(R.drawable.water);
-            leftAvatarImage.setImageResource(R.drawable.fire);
+        if ("Red".equalsIgnoreCase(avatar)) {
+            rightAvatarImage.setImageResource(R.drawable.fire);     // Player (red)
+            leftAvatarImage.setImageResource(R.drawable.water);   // Misty (blue)
 
+            rightAvatarOverlay.setImageResource(R.drawable.fire2);  // Player (red overlay)
+            leftAvatarOverlay.setImageResource(R.drawable.water2); // Misty (blue overlay)
         } else {
-            rightAvatarImage.setImageResource(R.drawable.fire);
-            leftAvatarImage.setImageResource(R.drawable.water);
+            rightAvatarImage.setImageResource(R.drawable.water);     // Player (blue)
+            leftAvatarImage.setImageResource(R.drawable.fire);     // Misty (red)
+
+            rightAvatarOverlay.setImageResource(R.drawable.water2);  // Player (blue overlay)
+            leftAvatarOverlay.setImageResource(R.drawable.fire2);  // Misty (red overlay)
         }
+
+        // Hide both overlays by default
+        leftAvatarOverlay.setVisibility(View.GONE);
+        rightAvatarOverlay.setVisibility(View.GONE);
     }
 }
 
