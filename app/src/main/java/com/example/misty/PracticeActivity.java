@@ -340,10 +340,18 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
                     new Handler(Looper.getMainLooper()).postDelayed(() -> resetBoard(isRightBoard), 10000);
                     //mistyTurnOver = true;
                 } else {
-                    buttons[row][col].setText(String.valueOf(numbers[row][col])); // this will show the number of squares away from the bomb
-                    buttons[row][col].setTextColor(Color.BLACK);
-                    buttons[row][col].setBackgroundColor(Color.parseColor("#c58e61"));
-                    //mistyTurnOver = true;
+                    int num = Character.getNumericValue(numbers[row][col]);
+
+                    int resID = getResources().getIdentifier("dirt" + num, "drawable",getPackageName());
+
+                    if(resID != 0){
+                        buttons[row][col].setBackgroundResource(resID);
+                        buttons[row][col].setText("");
+                    }else{
+                        buttons[row][col].setText(num); // this will show the number of squares away from the bomb
+                        buttons[row][col].setTextColor(Color.BLACK);
+                        buttons[row][col].setBackgroundColor(Color.parseColor("#c58e61"));
+                    }
                 }
             });
 
@@ -529,7 +537,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
             Log.i("PracticePage", "message being sent: " + messageToSend);
 
             final String mistyTurnMessage = "Mistyturn;" + "started";
-            long delayMillis = 2500; // 4 seconds
+            long delayMillis = 2500; // 2.5 seconds
 
             delayHandler.postDelayed(new Runnable() {
                 @Override
