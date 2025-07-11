@@ -70,6 +70,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
 
     private boolean hasTimerStarted = false;
     private boolean timerExpired = false;
+    private int buttonSize = 0;
 
 
     @Override
@@ -116,8 +117,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
                 COLUMNS = 3;
                 break;
         }
-        //the method in which we can set the row and column numbers
-        setupGrid();
+
 
         leftButtons = new Button[ROWS][COLUMNS];
         leftNumbers = new char[ROWS][COLUMNS];
@@ -144,6 +144,25 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
 
         initializeBoard(leftGridLayout, leftButtons, leftNumbers, leftRevealed, false);
         initializeBoard(rightGridLayout, rightButtons, rightNumbers, rightRevealed, true);
+        //the method in which we can set the row and column numbers
+        setupGrid();
+
+        int shiftAmount = 0; // default
+
+        switch (difficulty) {
+            case "Easy":
+                shiftAmount = 55; // shift more
+                break;
+            case "Medium":
+                shiftAmount = 40; // shift a little
+                break;
+            case "Hard":
+                shiftAmount = 40; // no shift
+                break;
+        }
+// Shift the right board slightly to the right
+        rightColumnNumbers.setTranslationX(shiftAmount);
+        leftColumnNumbers.setTranslationX(shiftAmount);
 
         Button backHomeButton = findViewById(R.id.backHomeButton);
         backHomeButton.setOnClickListener(v -> {
@@ -169,8 +188,8 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
             Log.d("GamePage", "messageReceived: parts length: " + parts.length);
 
             //if (timerExpired) {
-              //  Log.d("GamePage", "Timer has expired" + timerExpired);
-              //  return;
+            //  Log.d("GamePage", "Timer has expired" + timerExpired);
+            //  return;
             //}
 
             if (parts.length >= 2) {
@@ -185,12 +204,20 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
                             char rowChar = coordinates.charAt(0);
                             String colStr = coordinates.substring(1);
 
-                            if(rowChar == 'X'){
+                            if(rowChar == 'T'){
                                 specifiedRow = 0;
-                            }else if(rowChar == 'Y'){
+                            }else if(rowChar == 'U'){
                                 specifiedRow = 1;
-                            }else if(rowChar == 'Z'){
+                            }else if(rowChar == 'V'){
                                 specifiedRow = 2;
+                            }else if(rowChar == 'W'){
+                                specifiedRow = 3;
+                            }else if(rowChar == 'X'){
+                                specifiedRow = 4;
+                            }else if(rowChar == 'Y'){
+                                specifiedRow = 5;
+                            }else if(rowChar == 'Z'){
+                                specifiedRow = 6;
                             }
                             specifiedCol = Integer.parseInt(colStr) - 1;
 
@@ -274,6 +301,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
         }
 
         Log.d("GamePage", " Misty flipping tile at row" + row + ",col " + col);
+        Log.d("DEBUG", "Trying to flip square at row=" + row + ", col=" + col);
 
         char mv = flipButton(row, col, false); // Misty plays on right board
 
@@ -379,7 +407,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
         int maxBoardHeight = (int) (screenHeight * 0.6); // 60% of screen height
 
 // Adjust button size based on rows/columns, ensuring it fits within limits
-        int buttonSize = Math.min(maxBoardWidth / (COLUMNS + 1), maxBoardHeight / (ROWS + 2));
+        buttonSize = Math.min(maxBoardWidth / (COLUMNS + 1), maxBoardHeight / (ROWS + 2));
 
         for (int row = 0; row < ROWS; row++) {
             for (int col = 0; col < COLUMNS; col++) {
@@ -427,7 +455,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
         //if (timerExpired) {
         //Log.d("GamePage", "buttonClick: Main timer already expired. No action.");
         //Toast.makeText(GamePage.this, "Time's UP!", Toast.LENGTH_SHORT).show();
-       // return;
+        // return;
         if (rightRevealed[row][column]) {
             Log.d("Gamepage", "Tile already revealed at row " + row + "col," + column);
             return;
@@ -436,11 +464,11 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
             hasTimerStarted = true;
             GameTimer.getInstance().startTimer(() -> {
                 //runOnUiThread(() ->
-                  //      Toast.makeText(GamePage.this, "Time's up!", Toast.LENGTH_SHORT).show()
+                //      Toast.makeText(GamePage.this, "Time's up!", Toast.LENGTH_SHORT).show()
                 //);
                 Log.d("GamePage", "Timer expired");
             });
-                    }
+        }
         Log.d("GamePage", "Player making move at row" + row + "col " + column);
 
         char v = flipButton(row, column, true); //player's turn
@@ -494,10 +522,10 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
             columnPadding = 40; // Reduce column padding
             rowPadding = 30;    // Reduce row padding
         } else if (ROWS == 5) { // Medium mode (5x5)
-            columnPadding = 60;
+            columnPadding = 70; // if number == 1 move it more to the right same iwth 2 and 3
             rowPadding = 40;
         } else { // Easy mode (3x3)
-            columnPadding = 60;
+            columnPadding = 70;
             rowPadding = 50;
         }
 
@@ -508,66 +536,38 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
             colLabelLeft.setText(String.valueOf(i + 1));
             colLabelLeft.setGravity(Gravity.CENTER);
             colLabelLeft.setTextColor(Color.WHITE);
-            colLabelLeft.setTextSize(22); // Reduce text size slightly
-            colLabelLeft.setPadding(columnPadding, 10, columnPadding, 10);
-// Set wider layout params
-            LinearLayout.LayoutParams labelParams = new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-            );
-            labelParams.width = 190; // adjust as needed
-            colLabelLeft.setLayoutParams(labelParams);
+            colLabelLeft.setTextSize(22);
 
-            // translate only after layout is handled
-            if (i == 0) {
-                colLabelLeft.setTranslationX(90); // shift right
-            } else if (i == 1) {
-                colLabelLeft.setTranslationX(30); // shift more
-            }else if(i == 2){
-                colLabelLeft.setTranslationX(-20); //shift more left
-            }
-
+            // Match column label width to game button width
+            LinearLayout.LayoutParams paramsLeft = new LinearLayout.LayoutParams(buttonSize, ViewGroup.LayoutParams.WRAP_CONTENT);
+            colLabelLeft.setLayoutParams(paramsLeft);
             leftColumnNumbers.addView(colLabelLeft);
 
             TextView colLabelRight = new TextView(this);
             colLabelRight.setText(String.valueOf(i + 1));
-            colLabelRight.setTextSize(22f);
-            colLabelRight.setTextColor(Color.WHITE);
             colLabelRight.setGravity(Gravity.CENTER);
-            colLabelRight.setPadding(columnPadding, 10, columnPadding, 10);
-            // set wider layout params
-            labelParams = new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-            );
-            labelParams.width = 190; // adjust as needed
-            colLabelRight.setLayoutParams(labelParams);
+            colLabelRight.setTextColor(Color.WHITE);
+            colLabelRight.setTextSize(22);
 
-            // translate only after layout is handled
-            if (i == 0) {
-                colLabelRight.setTranslationX(90); // shift right
-            } else if (i == 1) {
-                colLabelRight.setTranslationX(30); // shift more
-            }else if(i == 2){
-                colLabelRight.setTranslationX(-20);
-            }
+            LinearLayout.LayoutParams paramsRight = new LinearLayout.LayoutParams(buttonSize, ViewGroup.LayoutParams.WRAP_CONTENT);
+            colLabelRight.setLayoutParams(paramsRight);
             rightColumnNumbers.addView(colLabelRight);
         }
 
         // Add row numbers
         for (int i = 0; i < ROWS; i++) {
             TextView rowLabelLeft = new TextView(this);
-            rowLabelLeft.setText(String.valueOf((char) ('X' + i)));
+            rowLabelLeft.setText(String.valueOf((char) ('T' + i)));
             rowLabelLeft.setTextSize(25f);
             rowLabelLeft.setTextColor(Color.WHITE);
 
             // Adjust padding dynamically
-            rowPadding = (ROWS == 3) ? 45 : (ROWS == 5) ? 40 : 20;
+            rowPadding = (ROWS == 3) ? 60 : (ROWS == 5) ? 40 : 20;
             rowLabelLeft.setPadding(50, rowPadding, 10, rowPadding);
             leftRowNumbers.addView(rowLabelLeft);
 
             TextView rowLabelRight = new TextView(this);
-            rowLabelRight.setText(String.valueOf((char) ('X' + i)));
+            rowLabelRight.setText(String.valueOf((char) ('T' + i)));
             rowLabelRight.setTextSize(25f);
             rowLabelRight.setTextColor(Color.WHITE);
             rowLabelRight.setPadding(50, rowPadding, 10, rowPadding);
@@ -582,7 +582,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
         boolean[][] revealed = isRightBoard ? rightRevealed : leftRevealed;
 
         if (!revealed[row][col]) {
-            //buttons[row][col].setText(String.valueOf(numbers[row][col]));
+
             revealed[row][col] = true;
 
 
@@ -798,4 +798,3 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
         rightAvatarOverlay.setVisibility(View.GONE);
     }
 }
-

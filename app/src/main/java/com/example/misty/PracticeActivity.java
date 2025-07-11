@@ -260,7 +260,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
         // Add row numbers
         for (int i = 0; i < ROWS; i++) {
             TextView rowLabelLeft = new TextView(this);
-            rowLabelLeft.setText(String.valueOf((char) ('X' + i)));
+            rowLabelLeft.setText(String.valueOf((char) ('T' + i)));
             rowLabelLeft.setTextSize(25f);
             rowLabelLeft.setTextColor(Color.WHITE);
 
@@ -270,7 +270,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
             leftRowNumbers.addView(rowLabelLeft);
 
             TextView rowLabelRight = new TextView(this);
-            rowLabelRight.setText(String.valueOf((char) ('X' + i)));
+            rowLabelRight.setText(String.valueOf((char) ('T' + i)));
             rowLabelRight.setTextSize(25f);
             rowLabelRight.setTextColor(Color.WHITE);
             rowLabelRight.setPadding(50, rowPadding, 10, rowPadding);
@@ -476,14 +476,13 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
                             char rowChar = coordinates.charAt(0);
                             String colStr = coordinates.substring(1);
 
-                            if(rowChar == 'X'){
+                            if(rowChar == 'T'){
                                 specifiedRow = 0;
-                            }else if(rowChar == 'Y'){
+                            }else if(rowChar == 'U'){
                                 specifiedRow = 1;
-                            }else if(rowChar == 'Z'){
+                            }else if(rowChar == 'V'){
                                 specifiedRow = 2;
                             }
-
                             specifiedCol = Integer.parseInt(colStr) - 1;
 
                             Log.d("PracticeActivity", "Parsed to row: " + specifiedRow + ", col: " + specifiedCol);

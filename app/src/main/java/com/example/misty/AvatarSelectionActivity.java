@@ -41,30 +41,33 @@ public class AvatarSelectionActivity extends AppCompatActivity implements  TCPCl
 
 
 
-
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_avatar_selection);
 
+
         Log.d("AvatarSelectionActivity", "onCreate called - mTcpClient instance: " + mTcpClient.toString());
         mTcpClient.addMessageListener(this);
 
+
         selectedDifficulty = getIntent().getStringExtra("difficulty");
+
 
         TextView avatarText = findViewById(R.id.avatarText);
         avatarText.setText("Choose Your Avatar");
-
-
 
         defaultRedButtonColor = ContextCompat.getColor(this, android.R.color.holo_red_light);
         defaultBlueButtonColor = ContextCompat.getColor(this, android.R.color.holo_blue_light);
         //highlightColor = ContextCompat.getColor(this, R.color.bright_yellow);
 
+
         Button redAvatarButton = findViewById(R.id.redAvatarButton);
 
+
         Button blueAvatarButton = findViewById(R.id.blueAvatarButton);
+
 
         Button nextPageButton = findViewById(R.id.nextPageButton);
 
@@ -80,6 +83,7 @@ public class AvatarSelectionActivity extends AppCompatActivity implements  TCPCl
             }
         });
 
+
         blueAvatarButton.setOnClickListener(v -> {
             if(blueAvatarButton.isPressed()){
                 redAvatarButton.setEnabled(false);
@@ -91,25 +95,39 @@ public class AvatarSelectionActivity extends AppCompatActivity implements  TCPCl
             }
         });
 
+
         nextPageButton.setOnClickListener(v -> {
-            if (selectedAvatar != null) { // Only proceed if an avatar is selected
-                Intent intent = new Intent(AvatarSelectionActivity.this, GamePage.class);
-                intent.putExtra("avatar", selectedAvatar);
-                intent.putExtra("difficulty", selectedDifficulty);
-                startActivity(intent);
+            if (selectedAvatar != null) {
+                new Thread(() -> {
+                    if (mTcpClient != null && mTcpClient.isConnected()) {
+                        mTcpClient.sendMessage("Difficulty;" + selectedDifficulty + "\n");
+
+
+                        // Safely switch to next activity **after** connection is done
+                        runOnUiThread(() -> {
+                            Intent intent = new Intent(AvatarSelectionActivity.this, GamePage.class);
+                            intent.putExtra("avatar", selectedAvatar);
+                            intent.putExtra("difficulty", selectedDifficulty);
+                            startActivity(intent);
+                        });
+                    } else {
+                        runOnUiThread(() -> Toast.makeText(this, "Connection failed", Toast.LENGTH_SHORT).show());
+                    }
+                }).start();
             }
         });
         // disable the next page button by doing false
         nextPageButton.setEnabled(false);
         // Set up a delay to allow sending before going to the next page.
         new Handler().postDelayed(() -> {
-        nextPageButton.setEnabled(true);
-    }, 10000);
+            nextPageButton.setEnabled(true);
+        }, 10000);
+        //redAvatarButton.setOnClickListener(v -> startGame("Red"));
+        //blueAvatarButton.setOnClickListener(v -> startGame("Blue"));
+    }
 
 
-    //redAvatarButton.setOnClickListener(v -> startGame("Red"));
-    //blueAvatarButton.setOnClickListener(v -> startGame("Blue"));
-}
+
 
 
 
@@ -136,11 +154,13 @@ public class AvatarSelectionActivity extends AppCompatActivity implements  TCPCl
         new SendMessageTask().execute(message);
     }
 
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         mTcpClient.removeMessageListener(this);
     }
+
 
     @Override
     public void messageReceived(String message) {
@@ -154,6 +174,7 @@ public class AvatarSelectionActivity extends AppCompatActivity implements  TCPCl
             }
         });
     }
+
 
     //  @Override
     public void disableButtons() {
@@ -176,5 +197,4 @@ public class AvatarSelectionActivity extends AppCompatActivity implements  TCPCl
             Log.d("SendMessageTask", "onPostExecute called");
         }
     }
-
 }
