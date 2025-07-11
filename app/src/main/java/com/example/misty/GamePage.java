@@ -71,6 +71,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
     private boolean hasTimerStarted = false;
     private boolean timerExpired = false;
     private int buttonSize = 0;
+    String difficulty;
 
 
     @Override
@@ -86,7 +87,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
         setContentView(R.layout.game_board);
 
         TextView textViewMode = findViewById(R.id.textViewMode);
-        String difficulty = getIntent().getStringExtra("difficulty");
+        difficulty = getIntent().getStringExtra("difficulty");
         if (difficulty == null) difficulty = "Easy"; // Default value if null
         textViewMode.setText("");
         leftGoldCountText = findViewById(R.id.leftGoldCountText);
@@ -203,21 +204,30 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
                         try {
                             char rowChar = coordinates.charAt(0);
                             String colStr = coordinates.substring(1);
-
-                            if(rowChar == 'T'){
-                                specifiedRow = 0;
-                            }else if(rowChar == 'U'){
-                                specifiedRow = 1;
-                            }else if(rowChar == 'V'){
-                                specifiedRow = 2;
-                            }else if(rowChar == 'W'){
-                                specifiedRow = 3;
-                            }else if(rowChar == 'X'){
-                                specifiedRow = 4;
-                            }else if(rowChar == 'Y'){
-                                specifiedRow = 5;
-                            }else if(rowChar == 'Z'){
-                                specifiedRow = 6;
+                            if(difficulty.equals("Easy")){
+                                if (rowChar == 'X') {
+                                    specifiedRow = 4;
+                                } else if (rowChar == 'Y') {
+                                    specifiedRow = 5;
+                                } else if (rowChar == 'Z') {
+                                    specifiedRow = 6;
+                                }
+                            }else {
+                                if (rowChar == 'S') {
+                                    specifiedRow = 0;
+                                } else if (rowChar == 'T') {
+                                    specifiedRow = 1;
+                                } else if (rowChar == 'V') {
+                                    specifiedRow = 2;
+                                } else if (rowChar == 'W') {
+                                    specifiedRow = 3;
+                                } else if (rowChar == 'X') {
+                                    specifiedRow = 4;
+                                } else if (rowChar == 'Y') {
+                                    specifiedRow = 5;
+                                } else if (rowChar == 'Z') {
+                                    specifiedRow = 6;
+                                }
                             }
                             specifiedCol = Integer.parseInt(colStr) - 1;
 
@@ -523,7 +533,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
             rowPadding = 30;    // Reduce row padding
         } else if (ROWS == 5) { // Medium mode (5x5)
             columnPadding = 70; // if number == 1 move it more to the right same iwth 2 and 3
-            rowPadding = 40;
+            rowPadding = 30;
         } else { // Easy mode (3x3)
             columnPadding = 70;
             rowPadding = 50;
@@ -555,19 +565,28 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
         }
 
         // Add row numbers
+        char[] rowLettersEasy = {'X','Y','Z'};
+        char[] rowLetters = {'S', 'T', 'V','W','X','Y','Z'};
         for (int i = 0; i < ROWS; i++) {
             TextView rowLabelLeft = new TextView(this);
-            rowLabelLeft.setText(String.valueOf((char) ('T' + i)));
+            if (difficulty.equals("Easy")) {
+                rowLabelLeft.setText(String.valueOf(rowLettersEasy[i]));
+            }else {
+                rowLabelLeft.setText(String.valueOf(rowLetters[i]));
+            }
             rowLabelLeft.setTextSize(25f);
             rowLabelLeft.setTextColor(Color.WHITE);
 
-            // Adjust padding dynamically
-            rowPadding = (ROWS == 3) ? 60 : (ROWS == 5) ? 40 : 20;
+            rowPadding = (ROWS == 3) ? 45 : (ROWS == 5) ? 20 : 12;
             rowLabelLeft.setPadding(50, rowPadding, 10, rowPadding);
             leftRowNumbers.addView(rowLabelLeft);
 
             TextView rowLabelRight = new TextView(this);
-            rowLabelRight.setText(String.valueOf((char) ('T' + i)));
+            if(difficulty.equals("Easy")) {
+                rowLabelRight.setText(String.valueOf(rowLettersEasy[i]));
+            }else{
+                rowLabelRight.setText(String.valueOf(rowLetters[i]));
+            }
             rowLabelRight.setTextSize(25f);
             rowLabelRight.setTextColor(Color.WHITE);
             rowLabelRight.setPadding(50, rowPadding, 10, rowPadding);

@@ -4,7 +4,7 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-07-10T19:30:30.697402800Z">
+        <DropdownSelection timestamp="2025-07-11T15:52:32.411982900Z">
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\aliia\.android\avd\Medium_Tablet.avd" />

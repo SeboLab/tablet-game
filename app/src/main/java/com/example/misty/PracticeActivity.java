@@ -256,26 +256,26 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
             }
             rightColumnNumbers.addView(colLabelRight);
         }
-
-        // Add row numbers
+        // Add row letters: S, T, V (instead of S, T, U)
+        char[] rowLetters = {'X', 'Y', 'Z'};
         for (int i = 0; i < ROWS; i++) {
             TextView rowLabelLeft = new TextView(this);
-            rowLabelLeft.setText(String.valueOf((char) ('T' + i)));
+            rowLabelLeft.setText(String.valueOf(rowLetters[i]));
             rowLabelLeft.setTextSize(25f);
             rowLabelLeft.setTextColor(Color.WHITE);
 
-            // Adjust padding dynamically
             rowPadding = (ROWS == 3) ? 45 : (ROWS == 5) ? 40 : 20;
             rowLabelLeft.setPadding(50, rowPadding, 10, rowPadding);
             leftRowNumbers.addView(rowLabelLeft);
 
             TextView rowLabelRight = new TextView(this);
-            rowLabelRight.setText(String.valueOf((char) ('T' + i)));
+            rowLabelRight.setText(String.valueOf(rowLetters[i]));
             rowLabelRight.setTextSize(25f);
             rowLabelRight.setTextColor(Color.WHITE);
             rowLabelRight.setPadding(50, rowPadding, 10, rowPadding);
             rightRowNumbers.addView(rowLabelRight);
         }
+
     }
 
     private void buttonClick(int row, int column) {
@@ -476,9 +476,9 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
                             char rowChar = coordinates.charAt(0);
                             String colStr = coordinates.substring(1);
 
-                            if(rowChar == 'T'){
+                            if(rowChar == 'S'){
                                 specifiedRow = 0;
-                            }else if(rowChar == 'U'){
+                            }else if(rowChar == 'T'){
                                 specifiedRow = 1;
                             }else if(rowChar == 'V'){
                                 specifiedRow = 2;
