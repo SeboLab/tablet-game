@@ -325,12 +325,12 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
             if (delayHandler != null) {
                 delayHandler.postDelayed(() -> {
                     Log.d("GamePage", "misty finished turn delay");
-                    showTurnMessage(true,4000);
+                    showTurnMessage(true,3000);
                     mistySpeaking = false;
                     mistyTurnOver = true;
                     enableUserBoard();
                     Log.d("GamePage", "Misty finished speaking. Player turn resumed.");
-                }, 10000);
+                }, 12000);
             }
         } else {
             Log.e("GamePage", "flipButton returned a tile may already be revealed");
@@ -485,8 +485,8 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
         //we check that v was not equal to a, since a is returned if the button has already been clicked.
         if (v != 'a') {
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                showTurnMessage(false, 4000);
-            }, 4000);
+                showTurnMessage(false, 5000);
+            }, 5000);
             //set misty turn state
             mistyTurnOver = false; // Misty's turn now
             mistySpeaking = false;
