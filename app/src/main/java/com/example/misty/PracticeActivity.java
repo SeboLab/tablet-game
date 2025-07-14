@@ -295,8 +295,6 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
         char v = flipButton(row, column, true); //player's turn
         //we check that v was not equal to a, since a is returned if the button has already been clicked.
         if (v != 'a') {
-
-
             //set misty turn state
             mistyTurnOver = false; // Misty's turn now
             mistySpeaking = false;

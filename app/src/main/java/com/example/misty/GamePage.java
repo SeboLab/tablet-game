@@ -25,7 +25,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.misty.Socketconnection.TCPClient;
 import com.example.misty.Socketconnection.TCPClientOwner;
-
+// after misty's turn message is too slow
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -485,8 +485,8 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
         //we check that v was not equal to a, since a is returned if the button has already been clicked.
         if (v != 'a') {
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                showTurnMessage(false, 5000);
-            }, 5000);
+                showTurnMessage(false, 4000);
+            }, 4000);
             //set misty turn state
             mistyTurnOver = false; // Misty's turn now
             mistySpeaking = false;
