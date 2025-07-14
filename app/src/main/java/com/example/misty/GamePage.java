@@ -325,7 +325,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
             if (delayHandler != null) {
                 delayHandler.postDelayed(() -> {
                     Log.d("GamePage", "misty finished turn delay");
-                    showTurnMessage(true,3000);
+                    showTurnMessage(true,4000);
                     mistySpeaking = false;
                     mistyTurnOver = true;
                     enableUserBoard();
@@ -485,8 +485,8 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
         //we check that v was not equal to a, since a is returned if the button has already been clicked.
         if (v != 'a') {
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                showTurnMessage(false, 3000);
-            }, 3000);
+                showTurnMessage(false, 4000);
+            }, 4000);
             //set misty turn state
             mistyTurnOver = false; // Misty's turn now
             mistySpeaking = false;
@@ -506,7 +506,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
             Log.i("GamePage", "message being sent: " + messageToSend);
 
             final String mistyTurnMessage = "Mistyturn;" + "started";
-            long delayMillis = 2500; // 4 seconds
+            long delayMillis = 2500; // 2.5 seconds
 
             delayHandler.postDelayed(new Runnable() {
                 @Override
