@@ -97,12 +97,6 @@ public class AvatarSelectionActivity extends AppCompatActivity implements  TCPCl
 
 
         nextPageButton.setOnClickListener(v -> {
-            if (selectedAvatar != null) { // Only proceed if an avatar is selected
-                Intent intent = new Intent(AvatarSelectionActivity.this, GamePage.class);
-                intent.putExtra("avatar", selectedAvatar);
-                intent.putExtra("difficulty", selectedDifficulty);
-                startActivity(intent);
-            /*
             if (selectedAvatar != null) {
                 new Thread(() -> {
                     if (mTcpClient != null && mTcpClient.isConnected()) {
@@ -120,8 +114,6 @@ public class AvatarSelectionActivity extends AppCompatActivity implements  TCPCl
                         runOnUiThread(() -> Toast.makeText(this, "Connection failed", Toast.LENGTH_SHORT).show());
                     }
                 }).start();
-
-             */
             }
         });
         // disable the next page button by doing false
@@ -129,7 +121,7 @@ public class AvatarSelectionActivity extends AppCompatActivity implements  TCPCl
         // Set up a delay to allow sending before going to the next page.
         new Handler().postDelayed(() -> {
             nextPageButton.setEnabled(true);
-        }, 1);
+        }, 10000);
         //redAvatarButton.setOnClickListener(v -> startGame("Red"));
         //blueAvatarButton.setOnClickListener(v -> startGame("Blue"));
     }

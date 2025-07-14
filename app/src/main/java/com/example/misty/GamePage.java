@@ -206,11 +206,11 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
                             String colStr = coordinates.substring(1);
                             if(difficulty.equals("Easy")){
                                 if (rowChar == 'X') {
-                                    specifiedRow = 4;
+                                    specifiedRow = 0;
                                 } else if (rowChar == 'Y') {
-                                    specifiedRow = 5;
+                                    specifiedRow = 1;
                                 } else if (rowChar == 'Z') {
-                                    specifiedRow = 6;
+                                    specifiedRow = 2;
                                 }
                             }else {
                                 if (rowChar == 'S') {
