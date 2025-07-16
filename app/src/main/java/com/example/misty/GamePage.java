@@ -66,6 +66,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
     private int specifiedCol = -1;
     private String playerAvatarColor = "Red";
     private String mistyAvatarColor = "Blue";
+    private boolean gameOver = false;
 
 
     private boolean hasTimerStarted = false;
@@ -194,7 +195,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
 
                 if (type.equals("GameFinished")) { // message from python: GameFinished;true;
                     Log.d("GamePage", "Game finished signal received.");
-                    autoClickBackHomeButton();
+                    new Handler(Looper.getMainLooper()).postDelayed(this::autoClickBackHomeButton, 5000); // 5000 ms = 5 seconds delay
                     return;
                 }
 
