@@ -188,14 +188,16 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
             String[] parts = message.split(";");
             Log.d("GamePage", "messageReceived: parts length: " + parts.length);
 
-            //if (timerExpired) {
-            //  Log.d("GamePage", "Timer has expired" + timerExpired);
-            //  return;
-            //}
-
             if (parts.length >= 2) {
                 String type = parts[0].trim();
                 Log.d("GamePage", "Message type: " + type);
+
+                if (type.equals("GameFinished")) { // message from python: GameFinished;true;
+                    Log.d("GamePage", "Game finished signal received.");
+                    autoClickBackHomeButton();
+                    return;
+                }
+
                 if (type.equals("Mistychoice")) {
                     String coordinates = parts[1].trim();
                     Log.d("GamePage", "messageReceived: coordinates: " + coordinates);
@@ -204,31 +206,21 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
                         try {
                             char rowChar = coordinates.charAt(0);
                             String colStr = coordinates.substring(1);
-                            if(difficulty.equals("Easy")){
-                                if (rowChar == 'X') {
-                                    specifiedRow = 0;
-                                } else if (rowChar == 'Y') {
-                                    specifiedRow = 1;
-                                } else if (rowChar == 'Z') {
-                                    specifiedRow = 2;
-                                }
-                            }else {
-                                if (rowChar == 'S') {
-                                    specifiedRow = 0;
-                                } else if (rowChar == 'T') {
-                                    specifiedRow = 1;
-                                } else if (rowChar == 'V') {
-                                    specifiedRow = 2;
-                                } else if (rowChar == 'W') {
-                                    specifiedRow = 3;
-                                } else if (rowChar == 'X') {
-                                    specifiedRow = 4;
-                                } else if (rowChar == 'Y') {
-                                    specifiedRow = 5;
-                                } else if (rowChar == 'Z') {
-                                    specifiedRow = 6;
-                                }
+
+                            if (difficulty.equals("Easy")) {
+                                if (rowChar == 'X') specifiedRow = 0;
+                                else if (rowChar == 'Y') specifiedRow = 1;
+                                else if (rowChar == 'Z') specifiedRow = 2;
+                            } else {
+                                if (rowChar == 'S') specifiedRow = 0;
+                                else if (rowChar == 'T') specifiedRow = 1;
+                                else if (rowChar == 'V') specifiedRow = 2;
+                                else if (rowChar == 'W') specifiedRow = 3;
+                                else if (rowChar == 'X') specifiedRow = 4;
+                                else if (rowChar == 'Y') specifiedRow = 5;
+                                else if (rowChar == 'Z') specifiedRow = 6;
                             }
+
                             specifiedCol = Integer.parseInt(colStr) - 1;
 
                             Log.d("GamePage", "Parsed to row: " + specifiedRow + ", col: " + specifiedCol);
@@ -815,5 +807,20 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
         // Hide both overlays by default
         leftAvatarOverlay.setVisibility(View.GONE);
         rightAvatarOverlay.setVisibility(View.GONE);
+    }
+    private void autoClickBackHomeButton(){
+        runOnUiThread(() -> {
+            Toast.makeText(GamePage.this, "Game Over! returning home.", Toast.LENGTH_SHORT).show();
+            Button backHomeButton = findViewById(R.id.backHomeButton);
+            backHomeButton.setEnabled(false); // disable to prevent manual cliking
+            sendHomeButtonClick(); // send message to python that home is clicked
+
+            // delay before going to Homeactivity
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                Intent intent = new Intent(GamePage.this, HomeActivity.class);
+                startActivity(intent);
+                finish();
+            }, 5000); // 5 seconds delay
+        });
     }
 }
