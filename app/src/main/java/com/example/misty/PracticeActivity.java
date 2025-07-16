@@ -474,11 +474,11 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
                             char rowChar = coordinates.charAt(0);
                             String colStr = coordinates.substring(1);
 
-                            if(rowChar == 'S'){
+                            if(rowChar == 'X'){
                                 specifiedRow = 0;
-                            }else if(rowChar == 'T'){
+                            }else if(rowChar == 'Y'){
                                 specifiedRow = 1;
-                            }else if(rowChar == 'V'){
+                            }else if(rowChar == 'Z'){
                                 specifiedRow = 2;
                             }
                             specifiedCol = Integer.parseInt(colStr) - 1;
