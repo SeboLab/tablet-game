@@ -209,8 +209,8 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
                             String colStr = coordinates.substring(1);
 
                             if (difficulty.equals("Easy")) {
-                                if (rowChar == 'X') specifiedRow = 0;
-                                else if (rowChar == 'Y') specifiedRow = 1;
+                                if (rowChar == 'D') specifiedRow = 0;
+                                else if (rowChar == 'J') specifiedRow = 1;
                                 else if (rowChar == 'Z') specifiedRow = 2;
                             } else {
                                 if (rowChar == 'S') specifiedRow = 0;
@@ -558,7 +558,7 @@ public class GamePage extends AppCompatActivity implements TCPClient.OnMessageRe
         }
 
         // Add row numbers
-        char[] rowLettersEasy = {'X','Y','Z'};
+        char[] rowLettersEasy = {'D','J','Z'};
         char[] rowLetters = {'S', 'T', 'V','W','X','Y','Z'};
         for (int i = 0; i < ROWS; i++) {
             TextView rowLabelLeft = new TextView(this);

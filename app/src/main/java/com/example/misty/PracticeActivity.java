@@ -257,7 +257,7 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
             rightColumnNumbers.addView(colLabelRight);
         }
         // Add row letters: S, T, V (instead of S, T, U)
-        char[] rowLetters = {'X', 'Y', 'Z'};
+        char[] rowLetters = {'D', 'J', 'Z'};
         for (int i = 0; i < ROWS; i++) {
             TextView rowLabelLeft = new TextView(this);
             rowLabelLeft.setText(String.valueOf(rowLetters[i]));
@@ -474,9 +474,9 @@ public class PracticeActivity extends AppCompatActivity implements TCPClient.OnM
                             char rowChar = coordinates.charAt(0);
                             String colStr = coordinates.substring(1);
 
-                            if(rowChar == 'X'){
+                            if(rowChar == 'D'){
                                 specifiedRow = 0;
-                            }else if(rowChar == 'Y'){
+                            }else if(rowChar == 'J'){
                                 specifiedRow = 1;
                             }else if(rowChar == 'Z'){
                                 specifiedRow = 2;

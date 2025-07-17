@@ -87,7 +87,7 @@ public class HomeActivity extends Activity implements View.OnClickListener, TCPC
                 }
             }).start();
             Intent intent = new Intent(HomeActivity.this, PracticeActivity.class);
-            intent.putExtra("difficulty", selectedDifficulty);
+            intent.putExtra("diFfficulty", selectedDifficulty);
             startActivity(intent);
         });
 
